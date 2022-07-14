@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "saru"
+version = "0.1.0"
+description = ""
+authors = ["michiaki yamada"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+PyAutoGUI = "^0.9.53"
+PyOpenGL = "^3.1.6"
+pytesseract = "^0.3.9"
+skia-python = "^87.4"
+SudachiPy = "^0.6.5"
+SudachiDict-core = "^20220519"
+pywin32 = "^304"
+glfw = "^2.5.3"
+opencv-python = "^4.6.0"
+google-cloud-vision = "^2.7.3"
+ConfigArgParse = "^1.5.3"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
