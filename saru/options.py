@@ -1,9 +1,14 @@
 import configargparse
 
+def _file_open(path, mode="rt"):
+    return open(path, mode, encoding='UTF-8')
+
+
 def get_options():
     parser = configargparse.ArgParser(
         default_config_files=["config.ini"],
-        description="Capture Japanese text from a screenshot or from the screen"
+        description="Capture Japanese text from a screenshot or from the screen",
+        config_file_open_func=_file_open
     )
     parser.add("-d", "--debug", action="store_true")
     parser.add("-n", "--no-watch", action="store_true")
