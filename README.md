@@ -10,6 +10,8 @@ a tool to help you read text in Japanese video games
 * automatically collects vocabulary
 * English subtitles via machine translation
 
+![Taiko Risshiden V](/screenshots/taiko1.png?raw=true "Taiko Risshiden V")
+
 Note: This is very much a work in progress and is rough around the edges.
 
 ## requirements
