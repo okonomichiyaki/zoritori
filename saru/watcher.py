@@ -17,10 +17,9 @@ from saru.vocabulary import save_vocabulary
 
 
 class Watcher(threading.Thread):
-
     def __init__(self, options, recognizer, event_queue, overlay):
         threading.Thread.__init__(self)
-        self._stop_flag=threading.Event()
+        self._stop_flag = threading.Event()
         self._WATCH_MARGIN = 5
         self._logger = logging.getLogger("saru")
 
@@ -78,7 +77,9 @@ class Watcher(threading.Thread):
 
     def _process(self):
         """Take a fresh screenshot and process it. if relevant, trigger drawing and update watch"""
-        (full_path, text_path) = take_screenshots(self._options.NotesFolder, self._saved_clip)
+        (full_path, text_path) = take_screenshots(
+            self._options.NotesFolder, self._saved_clip
+        )
         saru = process_image(self._options, self._recognizer, full_path, text_path)
         if saru:
             first_cdata = saru["cdata"][0][0]
@@ -86,9 +87,11 @@ class Watcher(threading.Thread):
                 self._saved_clip.x() + first_cdata.left + self._WATCH_MARGIN,
                 self._saved_clip.y() + first_cdata.top + self._WATCH_MARGIN,
                 first_cdata.width - self._WATCH_MARGIN * 2,
-                first_cdata.height - self._WATCH_MARGIN * 2
+                first_cdata.height - self._WATCH_MARGIN * 2,
             )
-            self._watch_path = take_watch_screenshot(self._options.NotesFolder, self._watch_region)
+            self._watch_path = take_watch_screenshot(
+                self._options.NotesFolder, self._watch_region
+            )
             self._last_saru = saru
             self._overlay.draw(lambda c: draw(c, self._options, self._saved_clip, saru))
 
@@ -98,7 +101,9 @@ class Watcher(threading.Thread):
             hover = self._find_hover(self._saved_clip, self._last_saru["tokens"])
             if hover != self._last_hover:
                 self._last_hover = hover
-                self._logger.info(f"hovered token: {hover.surface() if hover else None}")
+                self._logger.info(
+                    f"hovered token: {hover.surface() if hover else None}"
+                )
 
     def _find_hover(self, clip, tokens):
         for t in tokens:
@@ -108,10 +113,7 @@ class Watcher(threading.Thread):
 
     def _is_mouse_inside(self, clip, rect):
         shifted = skia.Rect.MakeXYWH(
-            clip.x() + rect.x(),
-            clip.y() + rect.y(),
-            rect.width(),
-            rect.height()
+            clip.x() + rect.x(), clip.y() + rect.y(), rect.width(), rect.height()
         )
         pos = pyautogui.position()
         pixel = skia.Rect.MakeXYWH(pos.x, pos.y, 1, 1)
@@ -136,4 +138,6 @@ class Watcher(threading.Thread):
             return False
         if not self._watch_region or not self._watch_path:
             return False
-        return screen_changed(self._options.NotesFolder, self._watch_path, self._watch_region)
+        return screen_changed(
+            self._options.NotesFolder, self._watch_path, self._watch_region
+        )

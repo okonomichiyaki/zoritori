@@ -41,7 +41,9 @@ def _split(row):
 
 def _probably_line_break(c):
     """Infers line break from Tesseract row"""
-    return c["conf"] == -1 and c["text"] == "" # TODO does this mistake spaces for line breaks?
+    return (
+        c["conf"] == -1 and c["text"] == ""
+    )  # TODO does this mistake spaces for line breaks?
 
 
 def _fix_line_numbers(cdata):
@@ -114,7 +116,12 @@ def _calculate_boxes(actuals, lines):
             else:
                 # actual box data from Tesseract is sometimes wildly off
                 # this returns a best estimate, based on median width/top/height per line
-                d["box"] = (leftmost + i * estimated_cwidth, estimated_top, estimated_cwidth, estimated_cheight)
+                d["box"] = (
+                    leftmost + i * estimated_cwidth,
+                    estimated_top,
+                    estimated_cwidth,
+                    estimated_cheight,
+                )
 
     for line in lines:
         _calculate_boxes_for_line(actuals, line)
@@ -122,6 +129,7 @@ def _calculate_boxes(actuals, lines):
 
 def _convert_to_cdata(lines):
     """Convert Tesseract tsv rows to CharacterData"""
+
     def _row_to_cdata(row):
         return CharacterData(
             row["text"],
@@ -130,7 +138,7 @@ def _convert_to_cdata(lines):
             row["box"][0],
             row["box"][1],
             row["box"][2],
-            row["box"][3]
+            row["box"][3],
         )
 
     return [[_row_to_cdata(row) for row in line] for line in lines]

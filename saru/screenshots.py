@@ -12,18 +12,23 @@ def take_watch_screenshot(folder: str, region):
 
 
 def take_screenshots(folder: str, clip: skia.Rect):
-    full_path = get_path(folder, "screenshot", "png", title="xxxxx", dated=True, timed=True)
+    full_path = get_path(
+        folder, "screenshot", "png", title="xxxxx", dated=True, timed=True
+    )
     pyautogui.screenshot(full_path)
 
-#    watch_path = get_path(folder, "screenshot", "png", title="watch")
-#    h = clip.height() / 9
-#    watch_clip = (clip.x(), clip.y() + h, clip.width(), h)
-#    pyautogui.screenshot(watch_path, region=watch_clip)
+    #    watch_path = get_path(folder, "screenshot", "png", title="watch")
+    #    h = clip.height() / 9
+    #    watch_clip = (clip.x(), clip.y() + h, clip.width(), h)
+    #    pyautogui.screenshot(watch_path, region=watch_clip)
 
     clip_path = get_path(folder, "screenshot", "png", title="text")
-    pyautogui.screenshot(clip_path, region=(clip.x(), clip.y(), clip.width(), clip.height()))
+    pyautogui.screenshot(
+        clip_path, region=(clip.x(), clip.y(), clip.width(), clip.height())
+    )
 
     return (full_path, clip_path)
+
 
 # returns (left, top, width, height) or None
 def locate(path):

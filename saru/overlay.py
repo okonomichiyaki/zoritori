@@ -39,7 +39,9 @@ class Overlay:
         window = glfw.create_window(width - 1, height - 1, self._title, None, None)
 
         def key_callback(window, key, scancode, action, mods):
-            self._logger.debug(f"key_callback: key={key} scancode={scancode} action={action}")
+            self._logger.debug(
+                f"key_callback: key={key} scancode={scancode} action={action}"
+            )
             if action == glfw.RELEASE:
                 if key == glfw.KEY_R:
                     clip = self._get_clip(window)
@@ -64,10 +66,15 @@ class Overlay:
             fb_height,
             0,  # sampleCnt
             0,  # stencilBits
-            skia.GrGLFramebufferInfo(0, GL.GL_RGBA8))
+            skia.GrGLFramebufferInfo(0, GL.GL_RGBA8),
+        )
         surface = skia.Surface.MakeFromBackendRenderTarget(
-            context, backend_render_target, skia.kBottomLeft_GrSurfaceOrigin,
-            skia.kRGBA_8888_ColorType, skia.ColorSpace.MakeSRGB())
+            context,
+            backend_render_target,
+            skia.kBottomLeft_GrSurfaceOrigin,
+            skia.kRGBA_8888_ColorType,
+            skia.ColorSpace.MakeSRGB(),
+        )
         assert surface is not None
         yield surface
         context.abandonContext()
@@ -96,13 +103,16 @@ class Overlay:
         """Primary UI loop: sets up GLFW window, then waits for input and draw events"""
         with self._glfw_window() as window:
             if not enable_click_through(self._title):
-                self._logger.warning(f"Failed to enable click through for window {self._title}")
+                self._logger.warning(
+                    f"Failed to enable click through for window {self._title}"
+                )
 
             GL.glClear(GL.GL_COLOR_BUFFER_BIT)
             with self._skia_surface(window) as surface:
                 with surface as canvas:
-                    while (glfw.get_key(window, glfw.KEY_ESCAPE) != glfw.PRESS and
-                           not glfw.window_should_close(window)):
+                    while glfw.get_key(
+                        window, glfw.KEY_ESCAPE
+                    ) != glfw.PRESS and not glfw.window_should_close(window):
                         if self._start_pos:
                             self._draw_clip(window, surface, canvas)
                         elif self._should_draw():

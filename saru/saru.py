@@ -58,8 +58,8 @@ def _is_junk(ldata):
 
 
 def _get_text(ldata):
-    lines = [''.join([d.text for d in line]) for line in ldata]
-    return '\n'.join(lines)
+    lines = ["".join([d.text for d in line]) for line in ldata]
+    return "\n".join(lines)
 
 
 def _recognize_tokenize_translate(options, recognizer, filename):
@@ -84,12 +84,12 @@ def _recognize_tokenize_translate(options, recognizer, filename):
         "translation": translation,
         "cdata": ldata,
         "tokens": tokens,
-        "furigana": furigana
+        "furigana": furigana,
     }
 
 
 def process_image(options, recognizer, full_path, text_path):
-    saru =  _recognize_tokenize_translate(options, recognizer, text_path)
+    saru = _recognize_tokenize_translate(options, recognizer, text_path)
     if saru is None:
         os.remove(text_path)
         os.remove(full_path)
@@ -97,7 +97,7 @@ def process_image(options, recognizer, full_path, text_path):
     text = saru["original"]
     os.remove(text_path)
     cleaned_up = text
-    for c in ["<", ">", ":", "\"", "/", "\\", "|", "?", "*", "\n"]:
+    for c in ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "\n"]:
         cleaned_up = cleaned_up.replace(c, "-")
     new_path = full_path.replace("xxxxx", cleaned_up)
     os.rename(full_path, new_path)

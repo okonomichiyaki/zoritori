@@ -16,6 +16,7 @@ class Furigana:
 @dataclass
 class CharacterData:
     """OCR data for a single character"""
+
     text: str
     line_num: int
     conf: float
@@ -35,6 +36,7 @@ class CharacterData:
 
     def height(self):
         return self.height
+
 
 class MergedName:
     """Wrapper around two Sudachi Morphemes, representing a full name"""
@@ -70,7 +72,9 @@ class Token:
         self._line_num = line_num
         self._char_num = char_num
         self._cdata = cdata
-        self._sudachi_methods = [f for f in dir(sudachipy.Morpheme) if not f.startswith("_")]
+        self._sudachi_methods = [
+            f for f in dir(sudachipy.Morpheme) if not f.startswith("_")
+        ]
 
     def box(self):
         left = self._cdata[0].left

@@ -8,7 +8,7 @@ def get_path(notes_folder, base, extension, title=None, dated=False, timed=False
         date = datetime.now().strftime("%Y-%m-%d")
         filename = filename + "-" + date
     if timed:
-        #time = datetime.now().strftime("T%H-%M-%S")
+        # time = datetime.now().strftime("T%H-%M-%S")
         time = datetime.now().strftime("T%H%M%S_%f")[:-3]
         filename = filename + "-" + time
     if title:

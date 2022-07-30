@@ -20,7 +20,11 @@ def _filter_seen_vocab(folder, new_words):
 def _is_vocab(token):
     # filter out punctuation, particles, ascii:
     part_of_speech = token.part_of_speech()[0]
-    return part_of_speech != "補助記号" and part_of_speech != "助詞" and not is_ascii(token.surface())
+    return (
+        part_of_speech != "補助記号"
+        and part_of_speech != "助詞"
+        and not is_ascii(token.surface())
+    )
 
 
 def save_vocabulary(folder, tokens, img_path=None):

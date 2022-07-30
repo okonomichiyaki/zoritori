@@ -1,56 +1,61 @@
 import configargparse
 
+
 def get_options():
     parser = configargparse.ArgParser(
         default_config_files=["config.ini"],
-        description="Capture Japanese text from a screenshot or from the screen"
+        description="Capture Japanese text from a screenshot or from the screen",
     )
     parser.add("-d", "--debug", action="store_true")
     parser.add("-n", "--no-watch", action="store_true")
     parser.add("-t", "--translate", action="store_true")
     parser.add("-p", "--parts_of_speech", action="store_true")
-    parser.add("-l", "--log-level",
-               default="info",
-               choices=["info", "debug"],
-               action="store")
-    parser.add("-f", "--furigana",
-               default="none",
-               choices=["none", "some", "all"],
-               action="store",
-               help=("Determines the level of furigana attached to kanji. "
-                     "If `some`, only include for proper nouns; if `all`, include for all kanji."))
-    parser.add("--FuriganaSize",
-               action="store",
-               type=int,
-               help=("Font size for furigana"))
-    parser.add("--SubtitleSize",
-               action="store",
-               type=int,
-               help=("Font size for subtitles"))
-    parser.add("--SubtitleMargin",
-               action="store",
-               type=int,
-               help=("Margin between subtitles"))
-    parser.add("-e", "--engine",
-               default="tesseract",
-               choices=["tesseract", "google"], action="store",
-               help=("Determines the OCR engine to use."))
-    parser.add("--TesseractExePath",
-               action="store",
-               help=("Path to Tesseract executable"))
-    parser.add("--DeepLUrl",
-               action="store",
-               help=("DeepL API translate URL"))
-    parser.add("--DeepLKey",
-               action="store",
-               help=("DeepL API key"))
-    parser.add("--NotesFolder",
-               action="store",
-               help=("Path to notes folder"))
-    parser.add('-c', '--config',
-               required=True,
-               is_config_file=True,
-               help='Path to config file')
-    parser.add("filename", metavar="filename", type=str, nargs="?", default=None,
-               help="Path to a screenshot. If present, will output JSON; if absent, will start overlay.")
+    parser.add(
+        "-l", "--log-level", default="info", choices=["info", "debug"], action="store"
+    )
+    parser.add(
+        "-f",
+        "--furigana",
+        default="none",
+        choices=["none", "some", "all"],
+        action="store",
+        help=(
+            "Determines the level of furigana attached to kanji. "
+            "If `some`, only include for proper nouns; if `all`, include for all kanji."
+        ),
+    )
+    parser.add(
+        "--FuriganaSize", action="store", type=int, help=("Font size for furigana")
+    )
+    parser.add(
+        "--SubtitleSize", action="store", type=int, help=("Font size for subtitles")
+    )
+    parser.add(
+        "--SubtitleMargin", action="store", type=int, help=("Margin between subtitles")
+    )
+    parser.add(
+        "-e",
+        "--engine",
+        default="tesseract",
+        choices=["tesseract", "google"],
+        action="store",
+        help=("Determines the OCR engine to use."),
+    )
+    parser.add(
+        "--TesseractExePath", action="store", help=("Path to Tesseract executable")
+    )
+    parser.add("--DeepLUrl", action="store", help=("DeepL API translate URL"))
+    parser.add("--DeepLKey", action="store", help=("DeepL API key"))
+    parser.add("--NotesFolder", action="store", help=("Path to notes folder"))
+    parser.add(
+        "-c", "--config", required=True, is_config_file=True, help="Path to config file"
+    )
+    parser.add(
+        "filename",
+        metavar="filename",
+        type=str,
+        nargs="?",
+        default=None,
+        help="Path to a screenshot. If present, will output JSON; if absent, will start overlay.",
+    )
     return parser.parse_args()

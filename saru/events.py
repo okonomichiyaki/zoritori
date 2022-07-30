@@ -1,6 +1,7 @@
 class Event:
     def get_key(self):
         return None
+
     def get_clip(self):
         return None
 

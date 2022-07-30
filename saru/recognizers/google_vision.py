@@ -24,7 +24,9 @@ class Recognizer:
         if response.error.message:
             raise Exception(
                 "{}\nFor more info on error messages, check: "
-                "https://cloud.google.com/apis/design/errors".format(response.error.message)
+                "https://cloud.google.com/apis/design/errors".format(
+                    response.error.message
+                )
             )
         return response
 
@@ -33,7 +35,9 @@ class Recognizer:
 
         def has_line_break(symbol):
             line_break = vision.types.TextAnnotation.DetectedBreak.BreakType.LINE_BREAK
-            return symbol.property and symbol.property.detected_break.type_ == line_break
+            return (
+                symbol.property and symbol.property.detected_break.type_ == line_break
+            )
 
         line_number = 0
         lines = []
@@ -60,5 +64,5 @@ class Recognizer:
         w = lower_right.x - x
         h = lower_right.y - y
         text = symbol.text
-        conf = 100.0 #symbol.confidence # TODO ?
+        conf = 100.0  # symbol.confidence # TODO ?
         return CharacterData(text, line_number, conf, x, y, w, h)

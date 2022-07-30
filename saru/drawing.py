@@ -47,15 +47,21 @@ def draw_subtitles(c, options, text, xd=0, yd=0):
     lines.reverse()
     for idx, line in enumerate(lines):
         font = skia.Font(typeface, subtitle_size)
-        paint = skia.Paint(AntiAlias=True, Style=skia.Paint.kFill_Style, Color=skia.ColorBLACK)
+        paint = skia.Paint(
+            AntiAlias=True, Style=skia.Paint.kFill_Style, Color=skia.ColorBLACK
+        )
         w = font.measureText(line)
         height = font.getSpacing()
         x = screen_width / 2 - (w + subtitle_margin) / 2 + xd
         y = screen_height - (idx + 1) * (height + subtitle_margin) + yd
         h = height + subtitle_margin
         c.drawRect(skia.Rect.MakeXYWH(x, y, w, h), paint)
-        paint = skia.Paint(AntiAlias=True, Style=skia.Paint.kFill_Style, Color=skia.ColorWHITE)
-        c.drawString(line, x + subtitle_margin / 2, y + height + subtitle_margin / 2, font, paint)
+        paint = skia.Paint(
+            AntiAlias=True, Style=skia.Paint.kFill_Style, Color=skia.ColorWHITE
+        )
+        c.drawString(
+            line, x + subtitle_margin / 2, y + height + subtitle_margin / 2, font, paint
+        )
 
 
 def draw_furigana(c, options, clip, fs):
@@ -70,7 +76,7 @@ def draw_furigana(c, options, clip, fs):
         width = font.measureText(text)
         x = x - width / 2
         # y parameter to draw_text appears to be the baseline, and text is drawn above it
-        c.drawString(text, x, y - 4, font, paint) # TODO: magic number
+        c.drawString(text, x, y - 4, font, paint)  # TODO: magic number
 
 
 def shift(a, b):
@@ -78,12 +84,14 @@ def shift(a, b):
 
 
 def draw_parts_of_speech(c, clip, saru):
-    paint = skia.Paint(Style=skia.Paint.kStroke_Style, StrokeWidth=3.0) # TODO: magic number
+    paint = skia.Paint(
+        Style=skia.Paint.kStroke_Style, StrokeWidth=3.0
+    )  # TODO: magic number
     for t in saru["tokens"]:
         if t.part_of_speech(2) == "人名":
-            paint.setColor(skia.ColorSetARGB(0xff, 0x35, 0xa1, 0x6b))
+            paint.setColor(skia.ColorSetARGB(0xFF, 0x35, 0xA1, 0x6B))
         elif t.part_of_speech(2) == "地名":
-            paint.setColor(skia.ColorSetARGB(0xff, 0xff, 0x7f, 0x00))
+            paint.setColor(skia.ColorSetARGB(0xFF, 0xFF, 0x7F, 0x00))
         else:
             continue
         rect = shift(t.box(), clip)

@@ -31,9 +31,11 @@ def main():
             print("No Google Cloud environment variable found")
             exit(1)
         from saru.recognizers.google_vision import Recognizer
+
         recognizer = Recognizer()
     elif options.engine == "tesseract":
         from saru.recognizers.tesseract import Recognizer
+
         recognizer = Recognizer(options.TesseractExePath)
 
     if options.filename:

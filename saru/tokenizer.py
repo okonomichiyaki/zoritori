@@ -19,7 +19,7 @@ def _convert(morphemes, ldata):
             char_count += 1
             prev_count = char_count
             continue
-        char_num = m.begin() - prev_count # index of first char relative to the line
+        char_num = m.begin() - prev_count  # index of first char relative to the line
         length = m.end() - m.begin()
         cdata = ldata[line_num][char_num : char_num + length]
         wrapped = Token(m, line_num, char_num, cdata)
@@ -29,7 +29,6 @@ def _convert(morphemes, ldata):
 
 
 def _merge_names(morphemes):
-
     def surname(m):
         return m.part_of_speech()[2] == "人名" and m.part_of_speech()[3] == "姓"
 
@@ -71,6 +70,12 @@ def tokenize(text: str, ldata: list[list[CharacterData]] = None) -> list[Token]:
         if part_of_speech == "空白":
             _logger.debug("\\n\t\t-\t\t%s", part_of_speech)
         else:
-            _logger.debug("%s\t%s\t%s\t%s", m.surface(), m.dictionary_form(), m.reading_form(), m.part_of_speech())
+            _logger.debug(
+                "%s\t%s\t%s\t%s",
+                m.surface(),
+                m.dictionary_form(),
+                m.reading_form(),
+                m.part_of_speech(),
+            )
     morphemes = _merge_names(morphemes)
     return _convert(morphemes, ldata)

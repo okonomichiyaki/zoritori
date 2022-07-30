@@ -10,7 +10,14 @@ def enable_click_through(title):
         # these flags allow clicking through the window (WS_EX_NOACTIVATE),
         # while still appearing in the taskbar (WS_EX_APPWINDOW)
         # https://docs.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles
-        exStyle = win32con.WS_EX_COMPOSITED | win32con.WS_EX_LAYERED | win32con.WS_EX_NOACTIVATE | win32con.WS_EX_TOPMOST | win32con.WS_EX_TRANSPARENT | win32con.WS_EX_APPWINDOW
+        exStyle = (
+            win32con.WS_EX_COMPOSITED
+            | win32con.WS_EX_LAYERED
+            | win32con.WS_EX_NOACTIVATE
+            | win32con.WS_EX_TOPMOST
+            | win32con.WS_EX_TRANSPARENT
+            | win32con.WS_EX_APPWINDOW
+        )
         win32api.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, exStyle)
         return True
     else:
