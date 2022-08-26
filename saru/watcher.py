@@ -14,13 +14,14 @@ from saru.drawing import draw, draw_all_boxes
 from saru.screenshots import take_screenshots, take_watch_screenshot, screen_changed
 from saru.saru import process_image
 from saru.vocabulary import save_vocabulary
+from saru.strings import is_punctuation
 
 
 class Watcher(threading.Thread):
     def __init__(self, options, recognizer, event_queue, overlay):
         threading.Thread.__init__(self)
         self._stop_flag = threading.Event()
-        self._WATCH_MARGIN = 5
+        self._WATCH_MARGIN = 5  # TODO: magic number
         self._logger = logging.getLogger("saru")
 
         self._options = options
@@ -75,6 +76,13 @@ class Watcher(threading.Thread):
             case _:
                 pass
 
+    def _get_first_non_punct(self, saru):
+        first_line = saru["cdata"][0]
+        for cdata in first_line:
+            if not is_punctuation(cdata.text):
+                return cdata
+        return None
+
     def _process(self):
         """Take a fresh screenshot and process it. if relevant, trigger drawing and update watch"""
         (full_path, text_path) = take_screenshots(
@@ -82,13 +90,20 @@ class Watcher(threading.Thread):
         )
         saru = process_image(self._options, self._recognizer, full_path, text_path)
         if saru:
-            first_cdata = saru["cdata"][0][0]
+            first_cdata = self._get_first_non_punct(saru)
+            if first_cdata is None:
+                first_cdata = saru["cdata"][0][0]
+                self._logger.warn(
+                    "failed to find non punctuation, using first character for watch: %s",
+                    first_cdata,
+                )
             self._watch_region = (
                 self._saved_clip.x() + first_cdata.left + self._WATCH_MARGIN,
                 self._saved_clip.y() + first_cdata.top + self._WATCH_MARGIN,
                 first_cdata.width - self._WATCH_MARGIN * 2,
                 first_cdata.height - self._WATCH_MARGIN * 2,
             )
+            self._logger.debug("watch_region: %s", self._watch_region)
             self._watch_path = take_watch_screenshot(
                 self._options.NotesFolder, self._watch_region
             )

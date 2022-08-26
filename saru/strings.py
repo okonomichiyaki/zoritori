@@ -1,3 +1,14 @@
+import unicodedata
+
+
+def is_punctuation(s):
+    """Returns true if string is a single punctuation character"""
+    if len(s) != 1:
+        return False
+    category = unicodedata.category(s)
+    return category.startswith("P")
+
+
 def is_ascii(s):
     """Returns true if string is all ASCII"""
     try:
