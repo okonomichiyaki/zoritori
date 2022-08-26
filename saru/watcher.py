@@ -83,6 +83,24 @@ class Watcher(threading.Thread):
                 return cdata
         return None
 
+    def _get_watch_region(self, saru):
+        first_cdata = self._get_first_non_punct(saru)
+        if first_cdata is None:
+            first_cdata = saru["cdata"][0][0]
+            self._logger.warn(
+                "failed to find non punctuation, using first character for watch: %s",
+                first_cdata,
+            )
+        x = self._saved_clip.x() + first_cdata.left + self._WATCH_MARGIN
+        y = self._saved_clip.y() + first_cdata.top + self._WATCH_MARGIN
+        w = first_cdata.width - self._WATCH_MARGIN * 2
+        if w < 0:
+            w = first_cdata.width
+        h = first_cdata.height - self._WATCH_MARGIN * 2
+        if h < 0:
+            h = first_cdata.height
+        return (x, y, w, h)
+
     def _process(self):
         """Take a fresh screenshot and process it. if relevant, trigger drawing and update watch"""
         (full_path, text_path) = take_screenshots(
@@ -90,19 +108,7 @@ class Watcher(threading.Thread):
         )
         saru = process_image(self._options, self._recognizer, full_path, text_path)
         if saru:
-            first_cdata = self._get_first_non_punct(saru)
-            if first_cdata is None:
-                first_cdata = saru["cdata"][0][0]
-                self._logger.warn(
-                    "failed to find non punctuation, using first character for watch: %s",
-                    first_cdata,
-                )
-            self._watch_region = (
-                self._saved_clip.x() + first_cdata.left + self._WATCH_MARGIN,
-                self._saved_clip.y() + first_cdata.top + self._WATCH_MARGIN,
-                first_cdata.width - self._WATCH_MARGIN * 2,
-                first_cdata.height - self._WATCH_MARGIN * 2,
-            )
+            self._watch_region = self._get_watch_region(saru)
             self._logger.debug("watch_region: %s", self._watch_region)
             self._watch_path = take_watch_screenshot(
                 self._options.NotesFolder, self._watch_region
