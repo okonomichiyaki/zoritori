@@ -17,6 +17,7 @@ class Overlay:
         self._event_queue = event_queue
         self._draw_queue = Queue()
         self._start_pos = None
+        self._stop = False
 
     def get_screen_size(self):
         monitor = glfw.get_primary_monitor()
@@ -82,6 +83,10 @@ class Overlay:
     def signal(self):
         glfw.post_empty_event()
 
+    def stop(self):
+        self._stop = True
+        self.signal()
+
     def _get_clip(self, window):
         (startx, starty) = self._start_pos
         (endx, endy) = glfw.get_cursor_pos(window)
@@ -110,9 +115,11 @@ class Overlay:
             GL.glClear(GL.GL_COLOR_BUFFER_BIT)
             with self._skia_surface(window) as surface:
                 with surface as canvas:
-                    while glfw.get_key(
-                        window, glfw.KEY_ESCAPE
-                    ) != glfw.PRESS and not glfw.window_should_close(window):
+                    while (
+                        glfw.get_key(window, glfw.KEY_ESCAPE) != glfw.PRESS
+                        and not glfw.window_should_close(window)
+                        and not self._stop
+                    ):
                         if self._start_pos:
                             self._draw_clip(window, surface, canvas)
                         elif self._should_draw():

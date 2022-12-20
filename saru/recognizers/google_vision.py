@@ -1,3 +1,4 @@
+import logging
 import io
 import os
 import sys
@@ -6,6 +7,7 @@ from itertools import groupby
 from google.cloud import vision_v1 as vision
 
 from saru.types import CharacterData
+from saru.recognizers.exceptions import RecognizerException
 
 
 class Recognizer:
@@ -20,15 +22,18 @@ class Recognizer:
         with io.open(path, "rb") as image_file:
             content = image_file.read()
         image = vision.Image(content=content)
-        response = self._client.text_detection(image=image)
-        if response.error.message:
-            raise Exception(
-                "{}\nFor more info on error messages, check: "
-                "https://cloud.google.com/apis/design/errors".format(
-                    response.error.message
+        try:
+            response = self._client.text_detection(image=image)
+            if response.error.message:
+                raise RecognizerException(
+                    "Google Cloud Vision response contained error message: "
+                    + response.error.message
                 )
-            )
-        return response
+            return response
+        except Exception as e:
+            raise RecognizerException(
+                "Google Cloud Vision client threw exception: " + e.message
+            ) from e
 
     def _collect_symbols(self, response):
         annotation = response.full_text_annotation

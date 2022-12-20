@@ -151,7 +151,14 @@ class Watcher(threading.Thread):
             changed = self._has_screen_changed()
             if self._saved_clip and (not self._watch_path or changed or event):
                 self._overlay.clear(block=True)
-                self._process()
+                try:
+                    self._process()
+                except Exception as e:
+                    self._logger.error(
+                        "Exception while processing screenshot; %s", e.message
+                    )
+                    self.stop()
+                    self._overlay.stop()
             self._update_hover()
 
     def _has_screen_changed(self):
