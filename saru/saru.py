@@ -11,6 +11,9 @@ from saru.types import Furigana
 from saru.vocabulary import save_vocabulary
 
 
+_logger = logging.getLogger("saru")
+
+
 def _get_furigana(tokens, cdata, level):
     if level == "none":
         return []
@@ -68,10 +71,12 @@ def _recognize_tokenize_translate(options, recognizer, filename):
     furigana_level = options.furigana
 
     ldata = recognizer.recognize(filename)
+    text = _get_text(ldata)
+
     if _is_junk(ldata):
+        _logger.debug("got junk: %s", text)
         return None
 
-    text = _get_text(ldata)
     tokens = tokenize(text, ldata)
     furigana = _get_furigana(tokens, ldata, furigana_level)
 
@@ -88,7 +93,23 @@ def _recognize_tokenize_translate(options, recognizer, filename):
     }
 
 
+def log_debug(saru):
+    for line in saru["cdata"]:
+        for d in line:
+            _logger.debug("%s %s %s", d.text, d.line_num, d.conf)
+    _logger.info(saru["original"])
+    if saru["translation"]:
+        _logger.info(saru["translation"])
+
+
+def process_image_light(options, recognizer):
+    saru = _recognize_tokenize_translate(options, recognizer, options.filename)
+    if saru and options.debug:
+        log_debug(saru)
+
+
 def process_image(options, recognizer, full_path, text_path):
+    """Processes an image for vocabulary collection and saving screenshots"""
     saru = _recognize_tokenize_translate(options, recognizer, text_path)
     if saru is None:
         os.remove(text_path)
@@ -103,13 +124,6 @@ def process_image(options, recognizer, full_path, text_path):
     os.rename(full_path, new_path)
     if not save_vocabulary(options.NotesFolder, saru["tokens"], new_path):
         os.remove(new_path)
-
-    _logger = logging.getLogger("saru")
-    for line in saru["cdata"]:
-        for d in line:
-            _logger.debug("%s %s %s", d.text, d.line_num, d.conf)
-    _logger.info(saru["original"])
-    if saru["translation"]:
-        _logger.info(saru["translation"])
-
+    if options.debug:
+        log_debug(saru)
     return saru

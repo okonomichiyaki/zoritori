@@ -39,7 +39,7 @@ def main():
         recognizer = Recognizer(options.TesseractExePath)
 
     if options.filename:
-        data = saru.saru.process_image(options, recognizer)
+        data = saru.saru.process_image_light(options, recognizer)
         if not options.debug:
             sys.stdout.reconfigure(encoding="utf-8", newline="\n")
             print(json.dumps(data))
