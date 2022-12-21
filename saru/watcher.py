@@ -4,6 +4,7 @@ import threading
 import queue
 import time
 import webbrowser
+from pathlib import Path
 
 import skia
 import glfw
@@ -15,6 +16,7 @@ from saru.screenshots import take_screenshots, take_watch_screenshot, screen_cha
 from saru.saru import process_image
 from saru.vocabulary import save_vocabulary
 from saru.strings import is_punctuation
+from saru.files import load_json, save_json
 
 
 class Watcher(threading.Thread):
@@ -34,6 +36,7 @@ class Watcher(threading.Thread):
         self._last_saru = None
         self._last_hover = None
         self._saved_clip = None
+        self._clips_path = Path.home() / ".saru" / "clips.json"
 
     def stop(self):
         self._stop_flag.set()
@@ -140,8 +143,29 @@ class Watcher(threading.Thread):
         pixel = skia.Rect.MakeXYWH(pos.x, pos.y, 1, 1)
         return shifted.intersect(pixel)
 
+    def _load_clips(self):
+        clips = load_json(self._clips_path)
+        if clips and len(clips) > 0:
+            clip = clips[0]
+            self._saved_clip = skia.Rect.MakeXYWH(
+                clip["x"], clip["y"], clip["w"], clip["h"]
+            )
+
+    def _save_clips(self):
+        clip = {
+            "x": self._saved_clip.x(),
+            "y": self._saved_clip.y(),
+            "w": self._saved_clip.width(),
+            "h": self._saved_clip.height(),
+        }
+        clips = [clip]
+        save_json(self._clips_path, clips)
+
     def run(self):
         """Primary watch loop, periodically takes screenshots and reprocesses text"""
+
+        self._load_clips()
+
         while not self._stop_flag.is_set():
             try:
                 event = self._event_queue.get(timeout=0.5)
@@ -160,6 +184,8 @@ class Watcher(threading.Thread):
                     self.stop()
                     self._overlay.stop()
             self._update_hover()
+
+        self._save_clips()
 
     def _has_screen_changed(self):
         if self._options.no_watch:
