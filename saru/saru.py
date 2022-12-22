@@ -70,12 +70,13 @@ def _recognize_tokenize_translate(options, recognizer, filename):
     should_translate = options.translate
     furigana_level = options.furigana
 
-    ldata = recognizer.recognize(filename)
+    raw_data = recognizer.recognize(filename)
+    ldata = raw_data.lines
     text = _get_text(ldata)
 
-    if _is_junk(ldata):
-        _logger.debug("got junk: %s", text)
-        return None
+    #    if _is_junk(ldata):
+    #        _logger.debug("got junk: %s", text)
+    #        return None
 
     tokens = tokenize(text, ldata)
     furigana = _get_furigana(tokens, ldata, furigana_level)
@@ -90,13 +91,14 @@ def _recognize_tokenize_translate(options, recognizer, filename):
         "cdata": ldata,
         "tokens": tokens,
         "furigana": furigana,
+        "raw_data": raw_data,
     }
 
 
 def log_debug(saru):
-    for line in saru["cdata"]:
-        for d in line:
-            _logger.debug("%s %s %s", d.text, d.line_num, d.conf)
+    #    for line in saru["cdata"]:
+    #        for d in line:
+    #            _logger.debug("%s %s %s", d.text, d.line_num, d.conf)
     _logger.info(saru["original"])
     if saru["translation"]:
         _logger.info(saru["translation"])
@@ -120,10 +122,10 @@ def process_image(options, recognizer, full_path, text_path):
     cleaned_up = text
     for c in ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "\n"]:
         cleaned_up = cleaned_up.replace(c, "-")
-    new_path = full_path.replace("xxxxx", cleaned_up)
-    os.rename(full_path, new_path)
-    if not save_vocabulary(options.NotesFolder, saru["tokens"], new_path):
-        os.remove(new_path)
+    #    new_path = full_path.replace("xxxxx", cleaned_up)
+    #    os.rename(full_path, new_path)
+    #    if not save_vocabulary(options.NotesFolder, saru["tokens"], new_path):
+    #        os.remove(new_path)
     if options.debug:
         log_debug(saru)
     return saru

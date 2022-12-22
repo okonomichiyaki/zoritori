@@ -10,7 +10,6 @@ import glfw
 import pyautogui
 
 from saru.overlay import Overlay
-from saru.drawing import draw, draw_all_boxes
 from saru.screenshots import take_screenshots, take_watch_screenshot, screen_changed
 from saru.saru import process_image
 from saru.vocabulary import save_vocabulary

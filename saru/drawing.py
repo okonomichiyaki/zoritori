@@ -17,14 +17,18 @@ def draw(c, options, clip, saru):
         c.drawRect(clip, paint)
     if saru["cdata"]:
         draw_low_confidence(c, clip, saru["cdata"], 50)
-    if options.debug and saru["cdata"]:
-        draw_all_boxes(c, clip, saru["cdata"])
+
+    if options.debug and saru["raw_data"].blocks:
+        draw_block_boxes(c, clip, saru["raw_data"].blocks)
+
     if saru["furigana"]:
         draw_furigana(c, options, clip, saru["furigana"])
-    if saru["translation"]:
-        draw_subtitles(c, options, saru["translation"])
-    elif options.debug and saru["original"]:
-        draw_subtitles(c, options, saru["original"])
+
+
+#    if saru["translation"]:
+#        draw_subtitles(c, options, saru["translation"])
+#    elif options.debug and saru["original"]:
+#        draw_subtitles(c, options, saru["original"])
 
 
 def draw_subtitles(c, options, text, xd=0, yd=0):
@@ -98,16 +102,24 @@ def draw_parts_of_speech(c, clip, saru):
         c.drawRect(rect, paint)
 
 
+# TODO: rename this
 def cdata_to_rect(cdata):
     return skia.Rect.MakeXYWH(cdata.left, cdata.top, cdata.width, cdata.height)
 
 
-def draw_all_boxes(c, clip, lines):
+def draw_character_boxes(c, clip, lines):
     paint = skia.Paint(Color=skia.ColorGREEN, Style=skia.Paint.kStroke_Style)
     for line in lines:
         for cdata in line:
             rect = shift(cdata_to_rect(cdata), clip)
             c.drawRect(rect, paint)
+
+
+def draw_block_boxes(c, clip, blocks):
+    paint = skia.Paint(Color=skia.ColorGREEN, Style=skia.Paint.kStroke_Style)
+    for block in blocks:
+        rect = shift(cdata_to_rect(block), clip)
+        c.drawRect(rect, paint)
 
 
 def draw_low_confidence(c, clip, lines, threshold=50):

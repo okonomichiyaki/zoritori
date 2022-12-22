@@ -1,3 +1,4 @@
+import logging
 import pyautogui
 import skia
 
@@ -5,10 +6,16 @@ from saru.files import get_path
 from saru.types import CharacterData
 
 
-def take_watch_screenshot(folder: str, region):
-    watch_path = get_path(folder, "screenshot", "png", title="watch")
-    pyautogui.screenshot(watch_path, region=region)
-    return watch_path
+_logger = logging.getLogger("saru")
+
+
+def take_watch_screenshot(folder: str, regions):
+    watch_paths = []
+    for i, region in enumerate(regions):
+        watch_path = get_path(folder, "screenshot", "png", title=f"watch_{i}_base")
+        pyautogui.screenshot(watch_path, region=region)
+        watch_paths.append(watch_path)
+    return watch_paths
 
 
 def take_screenshots(folder: str, clip: skia.Rect):
@@ -16,12 +23,6 @@ def take_screenshots(folder: str, clip: skia.Rect):
         folder, "screenshot", "png", title="xxxxx", dated=True, timed=True
     )
     pyautogui.screenshot(full_path)
-
-    #    watch_path = get_path(folder, "screenshot", "png", title="watch")
-    #    h = clip.height() / 9
-    #    watch_clip = (clip.x(), clip.y() + h, clip.width(), h)
-    #    pyautogui.screenshot(watch_path, region=watch_clip)
-
     clip_path = get_path(folder, "screenshot", "png", title="text")
     pyautogui.screenshot(
         clip_path, region=(clip.x(), clip.y(), clip.width(), clip.height())
@@ -38,10 +39,16 @@ def locate(path):
         return None
 
 
-def screen_changed(folder, path, region):
-    path2 = get_path(folder, "screenshot", "png", title="watch2")
-    pyautogui.screenshot(path2, region=region)
-    try:
-        return not pyautogui.locate(path, path2, grayscale=False)
-    except pyautogui.ImageNotFoundException:
-        return True
+def screen_changed(folder, paths, regions):
+    assert len(paths) == len(
+        regions
+    ), f"number of paths and regions differed: {paths} {regions}"
+    for i, path in enumerate(paths):
+        path2 = get_path(folder, "screenshot", "png", title=f"watch_{i}_test")
+        pyautogui.screenshot(path2, region=regions[i])
+        try:
+            if not pyautogui.locate(path, path2, grayscale=False):
+                return True
+        except pyautogui.ImageNotFoundException:
+            return True
+    return False

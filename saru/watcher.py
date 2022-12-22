@@ -5,13 +5,14 @@ import queue
 import time
 import webbrowser
 from pathlib import Path
+from math import trunc
 
 import skia
 import glfw
 import pyautogui
 
 from saru.overlay import Overlay
-from saru.drawing import draw, draw_all_boxes
+from saru.drawing import draw
 from saru.screenshots import take_screenshots, take_watch_screenshot, screen_changed
 from saru.saru import process_image
 from saru.vocabulary import save_vocabulary
@@ -31,8 +32,8 @@ class Watcher(threading.Thread):
         self._event_queue = event_queue
         self._overlay = overlay
 
-        self._watch_path = None
-        self._watch_region = None
+        self._watch_paths = None
+        self._watch_regions = None
         self._last_saru = None
         self._last_hover = None
         self._saved_clip = None
@@ -79,31 +80,6 @@ class Watcher(threading.Thread):
             case _:
                 pass
 
-    def _get_first_non_punct(self, saru):
-        first_line = saru["cdata"][0]
-        for cdata in first_line:
-            if not is_punctuation(cdata.text):
-                return cdata
-        return None
-
-    def _get_watch_region(self, saru):
-        first_cdata = self._get_first_non_punct(saru)
-        if first_cdata is None:
-            first_cdata = saru["cdata"][0][0]
-            self._logger.warn(
-                "failed to find non punctuation, using first character for watch: %s",
-                first_cdata,
-            )
-        x = self._saved_clip.x() + first_cdata.left + self._WATCH_MARGIN
-        y = self._saved_clip.y() + first_cdata.top + self._WATCH_MARGIN
-        w = first_cdata.width - self._WATCH_MARGIN * 2
-        if w < 0:
-            w = first_cdata.width
-        h = first_cdata.height - self._WATCH_MARGIN * 2
-        if h < 0:
-            h = first_cdata.height
-        return (x, y, w, h)
-
     def _process(self):
         """Take a fresh screenshot and process it. if relevant, trigger drawing and update watch"""
         (full_path, text_path) = take_screenshots(
@@ -111,12 +87,8 @@ class Watcher(threading.Thread):
         )
         saru = process_image(self._options, self._recognizer, full_path, text_path)
         if saru:
-            self._watch_region = self._get_watch_region(saru)
-            self._logger.debug("watch_region: %s", self._watch_region)
-            self._watch_path = take_watch_screenshot(
-                self._options.NotesFolder, self._watch_region
-            )
             self._last_saru = saru
+            self._update_watch()
             self._overlay.draw(lambda c: draw(c, self._options, self._saved_clip, saru))
 
     def _update_hover(self):
@@ -173,7 +145,7 @@ class Watcher(threading.Thread):
                 event = None
             self._handle_event(event)
             changed = self._has_screen_changed()
-            if self._saved_clip and (not self._watch_path or changed or event):
+            if self._saved_clip and (not self._watch_paths or changed or event):
                 self._overlay.clear(block=True)
                 try:
                     self._process()
@@ -187,11 +159,66 @@ class Watcher(threading.Thread):
 
         self._save_clips()
 
+    def _get_first_non_punct(self, saru):
+        first_line = saru["cdata"][0]
+        for cdata in first_line:
+            if not is_punctuation(cdata.text):
+                return cdata
+        return None
+
+    def _get_watch_regions(self, saru):
+        watches = []
+
+        blocks = saru["raw_data"].blocks
+        # find largest block
+        block = max(blocks, key=lambda block: block.width * block.height)
+        # find middle char in block
+        line = block.lines[trunc(len(block.lines) / 2)]
+        middle = line[trunc(len(line) / 2)]
+        watches.append(middle)
+
+        first = self._get_first_non_punct(saru)
+        if first is None:
+            first = saru["cdata"][0][0]
+            self._logger.warn(
+                "failed to find non punctuation, using first character for watch: %s",
+                first,
+            )
+        watches.append(first)
+
+        regions = []
+        for watch in watches:
+            x = self._saved_clip.x() + watch.left + self._WATCH_MARGIN
+            y = self._saved_clip.y() + watch.top + self._WATCH_MARGIN
+            w = watch.width - self._WATCH_MARGIN * 2
+            if w <= 0:
+                w = watch.width
+            h = watch.height - self._WATCH_MARGIN * 2
+            if h <= 0:
+                h = watch.height
+
+            if w > 0 and h > 0:
+                region = (x, y, w, h)
+                regions.append(region)
+                self._logger.debug("watch char: %s, region: %s", watch.text, region)
+
+        return regions
+
+    def _update_watch(self):
+        new_watch_regions = self._get_watch_regions(self._last_saru)
+        if len(new_watch_regions) > 0:
+            self._watch_regions = new_watch_regions
+            self._watch_paths = take_watch_screenshot(
+                self._options.NotesFolder, self._watch_regions
+            )
+        else:
+            self._logger.warn("failed to find watch regions")
+
     def _has_screen_changed(self):
         if self._options.no_watch:
             return False
-        if not self._watch_region or not self._watch_path:
+        if not self._watch_regions or not self._watch_paths:
             return False
         return screen_changed(
-            self._options.NotesFolder, self._watch_path, self._watch_region
+            self._options.NotesFolder, self._watch_paths, self._watch_regions
         )

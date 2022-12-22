@@ -1,9 +1,13 @@
+import logging
 from dataclasses import dataclass
 
 import sudachipy
 import skia
 
 from saru.strings import katakana_to_hiragana, all_kana, is_ascii
+
+
+_logger = logging.getLogger("saru")
 
 
 @dataclass
@@ -14,12 +18,9 @@ class Furigana:
 
 
 @dataclass
-class CharacterData:
-    """OCR data for a single character"""
+class Box:
+    """Generic bounding box"""
 
-    text: str
-    line_num: int
-    conf: float
     left: int
     top: int
     width: int
@@ -31,11 +32,85 @@ class CharacterData:
     def y(self):
         return self.top
 
-    def width(self):
-        return self.width
 
+@dataclass
+class CharacterData:
+    """OCR data for a single character"""
+
+    text: str
+    line_num: int
+    conf: float
+    box: Box
+
+    @property
+    def x(self):
+        return self.box.left
+
+    @property
+    def y(self):
+        return self.box.top
+
+    @property
+    def left(self):
+        return self.box.left
+
+    @property
+    def top(self):
+        return self.box.top
+
+    @property
+    def width(self):
+        return self.box.width
+
+    @property
     def height(self):
-        return self.height
+        return self.box.height
+
+
+@dataclass
+class BlockData:
+    """OCR data for a block of text"""
+
+    lines: list[list[CharacterData]]
+    box: Box
+
+    @property
+    def x(self):
+        return self.box.left
+
+    @property
+    def y(self):
+        return self.box.top
+
+    @property
+    def left(self):
+        return self.box.left
+
+    @property
+    def top(self):
+        return self.box.top
+
+    @property
+    def width(self):
+        return self.box.width
+
+    @property
+    def height(self):
+        return self.box.height
+
+
+@dataclass
+class RecognizeData:
+    """Response data from OCR engine"""
+
+    lines: list[list[CharacterData]]
+    blocks: list[BlockData]
+
+    def lines(self):
+        return self.lines
+
+    def blocks(self):
+        return self.blocks
 
 
 class MergedName:
@@ -77,6 +152,8 @@ class Token:
         ]
 
     def box(self):
+        if len(self._cdata) < 1:
+            _logger.error("token has empty cdata, %s", sudachi_morpheme)
         left = self._cdata[0].left
         top = self._cdata[0].top
         height = self._cdata[0].height
