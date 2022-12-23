@@ -147,6 +147,8 @@ class Watcher(threading.Thread):
             )
 
     def _save_clips(self):
+        if not self._saved_clip:
+            return
         clip = {
             "x": self._saved_clip.x(),
             "y": self._saved_clip.y(),
