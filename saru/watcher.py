@@ -103,16 +103,17 @@ class Watcher(threading.Thread):
                 self._logger.debug("secondary clip: %s", sdata.original)
         self._secondary_clip = None
 
-        (full_path, text_path) = take_screenshots(
-            self._options.NotesFolder, self._saved_clip
-        )
-        sdata = process_image(self._options, self._recognizer, full_path, text_path)
-        if sdata:
-            self._last_sdata = sdata
-            self._update_watch()
-            self._overlay.draw(
-                lambda c: draw(c, self._options, self._saved_clip, sdata)
-            )  # TODO: draw secondary data, if present
+        if self._saved_clip:  # TODO: could check if this has changed
+            (full_path, text_path) = take_screenshots(
+                self._options.NotesFolder, self._saved_clip
+            )
+            sdata = process_image(self._options, self._recognizer, full_path, text_path)
+            if sdata:
+                self._last_sdata = sdata
+                self._update_watch()
+                self._overlay.draw(
+                    lambda c: draw(c, self._options, self._saved_clip, sdata)
+                )  # TODO: draw secondary data, if present
 
     def _update_hover(self):
         """Check if the mouse cursor is hovering over a token, and if so save the token"""
@@ -158,6 +159,9 @@ class Watcher(threading.Thread):
         clips = [clip]
         save_json(self._clips_path, clips)
 
+    def _any_clip(self):
+        return self._saved_clip or self._secondary_clip
+
     def run(self):
         """Primary watch loop, periodically takes screenshots and reprocesses text"""
 
@@ -170,7 +174,7 @@ class Watcher(threading.Thread):
                 event = None
             self._handle_event(event)
             changed = self._has_screen_changed()
-            if self._saved_clip and (not self._watch_paths or changed or event):
+            if self._any_clip() and (not self._watch_paths or changed or event):
                 self._overlay.clear(block=True)
                 try:
                     self._process()
