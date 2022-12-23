@@ -22,9 +22,10 @@ def _convert(morphemes, ldata):
         char_num = m.begin() - prev_count  # index of first char relative to the line
         length = m.end() - m.begin()
         cdata = ldata[line_num][char_num : char_num + length]
-        wrapped = Token(m, line_num, char_num, cdata)
-        char_count += wrapped.length()
-        result.append(wrapped)
+        if len(cdata) > 0:
+            wrapped = Token(m, line_num, char_num, cdata)
+            char_count += wrapped.length()
+            result.append(wrapped)
     return result
 
 

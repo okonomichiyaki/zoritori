@@ -152,8 +152,6 @@ class Token:
         ]
 
     def box(self):
-        if len(self._cdata) < 1:
-            _logger.error("token has empty cdata, %s", sudachi_morpheme)
         left = self._cdata[0].left
         top = self._cdata[0].top
         height = self._cdata[0].height
