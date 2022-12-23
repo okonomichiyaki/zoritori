@@ -13,8 +13,13 @@ import pyautogui
 
 from saru.overlay import Overlay
 from saru.drawing import draw
-from saru.screenshots import take_screenshots, take_watch_screenshot, screen_changed
-from saru.saru import process_image
+from saru.screenshots import (
+    take_screenshots,
+    take_watch_screenshot,
+    screen_changed,
+    take_screenshot_clip_only,
+)
+from saru.saru import process_image, process_image_light
 from saru.vocabulary import save_vocabulary
 from saru.strings import is_punctuation
 from saru.files import load_json, save_json
@@ -37,6 +42,7 @@ class Watcher(threading.Thread):
         self._last_saru = None
         self._last_hover = None
         self._saved_clip = None
+        self._secondary_clip = None
         self._clips_path = Path.home() / ".saru" / "clips.json"
 
     def stop(self):
@@ -46,14 +52,19 @@ class Watcher(threading.Thread):
         """Handles input events from the overlay"""
         if not event:
             return
+        clip = event.get_clip()
         key = event.get_key()
-        if key:
+        if clip and key == glfw.KEY_R:
+            self._logger.info(f"watcher got primary clip event: {clip}")
+            self._saved_clip = clip
+        if clip and key == glfw.KEY_Q:
+            self._logger.info(f"watcher got secondary clip event: {clip}")
+            self._secondary_clip = clip
+        elif key:
             self._logger.info(f"watcher got key event: {key}")
             self._handle_key(key)
-        clip = event.get_clip()
-        if clip:
-            self._logger.info(f"watcher got clip event: {clip}")
-            self._saved_clip = clip
+        else:
+            self._logger.info(f"watcher got unknown event: {event}")
 
     def _open_search(self, url):
         if self._last_hover:
@@ -82,6 +93,16 @@ class Watcher(threading.Thread):
 
     def _process(self):
         """Take a fresh screenshot and process it. if relevant, trigger drawing and update watch"""
+
+        if self._secondary_clip:
+            path = take_screenshot_clip_only(
+                self._options.NotesFolder, self._secondary_clip
+            )
+            saru = process_image_light(path, self._options, self._recognizer)
+            if saru:
+                self._logger.debug("secondary clip: %s", saru["original"])
+        self._secondary_clip = None
+
         (full_path, text_path) = take_screenshots(
             self._options.NotesFolder, self._saved_clip
         )
@@ -89,7 +110,9 @@ class Watcher(threading.Thread):
         if saru:
             self._last_saru = saru
             self._update_watch()
-            self._overlay.draw(lambda c: draw(c, self._options, self._saved_clip, saru))
+            self._overlay.draw(
+                lambda c: draw(c, self._options, self._saved_clip, saru)
+            )  # TODO: draw secondary data, if present
 
     def _update_hover(self):
         """Check if the mouse cursor is hovering over a token, and if so save the token"""

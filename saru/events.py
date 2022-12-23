@@ -15,8 +15,12 @@ class KeyEvent(Event):
 
 
 class ClipEvent(Event):
-    def __init__(self, clip):
+    def __init__(self, key, clip):
+        self._key = key
         self._clip = clip
+
+    def get_key(self):
+        return self._key
 
     def get_clip(self):
         return self._clip

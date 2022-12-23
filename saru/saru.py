@@ -104,10 +104,11 @@ def log_debug(saru):
         _logger.info(saru["translation"])
 
 
-def process_image_light(options, recognizer):
-    saru = _recognize_tokenize_translate(options, recognizer, options.filename)
+def process_image_light(path, options, recognizer):
+    saru = _recognize_tokenize_translate(options, recognizer, path)
     if saru and options.debug:
         log_debug(saru)
+    return saru
 
 
 def process_image(options, recognizer, full_path, text_path):
