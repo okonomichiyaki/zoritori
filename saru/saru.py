@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from saru.translator import translate
 from saru.tokenizer import tokenize
-from saru.types import Furigana
+from saru.types import Furigana, SaruData
 from saru.vocabulary import save_vocabulary
 
 
@@ -85,23 +85,16 @@ def _recognize_tokenize_translate(options, recognizer, filename):
     if should_translate:
         translation = translate(text, options.DeepLUrl, options.DeepLKey)
 
-    return {
-        "original": text,
-        "translation": translation,
-        "cdata": ldata,
-        "tokens": tokens,
-        "furigana": furigana,
-        "raw_data": raw_data,
-    }
+    return SaruData(text, translation, ldata, tokens, furigana, raw_data)
 
 
 def log_debug(saru):
     #    for line in saru["cdata"]:
     #        for d in line:
     #            _logger.debug("%s %s %s", d.text, d.line_num, d.conf)
-    _logger.info(saru["original"])
-    if saru["translation"]:
-        _logger.info(saru["translation"])
+    _logger.info(saru.original)
+    if saru.translation:
+        _logger.info(saru.translation)
 
 
 def process_image_light(path, options, recognizer):
@@ -118,7 +111,7 @@ def process_image(options, recognizer, full_path, text_path):
         os.remove(text_path)
         os.remove(full_path)
         return None
-    text = saru["original"]
+    text = saru.original
     os.remove(text_path)
     cleaned_up = text
     for c in ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "\n"]:

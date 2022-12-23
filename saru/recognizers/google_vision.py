@@ -6,7 +6,7 @@ from itertools import groupby
 
 from google.cloud import vision_v1 as vision
 
-from saru.types import CharacterData, BlockData, RecognizeData, Box
+from saru.types import CharacterData, BlockData, RawData, Box
 from saru.recognizers.exceptions import RecognizerException
 
 
@@ -14,7 +14,7 @@ class Recognizer:
     def __init__(self):
         self._client = vision.ImageAnnotatorClient()
 
-    def recognize(self, path) -> RecognizeData:
+    def recognize(self, path) -> RawData:
         response = self._detect_text(path)
         return self._collect_symbols(response)
 
@@ -74,7 +74,7 @@ class Recognizer:
                 box = self._vertices_to_box(vertices)
                 blocks.append(BlockData(lines, box))
 
-        return RecognizeData(all_lines, blocks)
+        return RawData(all_lines, blocks)
 
     def _convert(self, symbol, line_number):
         vertices = symbol.bounding_box.vertices

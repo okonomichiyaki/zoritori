@@ -39,7 +39,7 @@ class Watcher(threading.Thread):
 
         self._watch_paths = None
         self._watch_regions = None
-        self._last_saru = None
+        self._last_sdata = None
         self._last_hover = None
         self._saved_clip = None
         self._secondary_clip = None
@@ -69,8 +69,8 @@ class Watcher(threading.Thread):
     def _open_search(self, url):
         if self._last_hover:
             search_term = self._last_hover.surface()
-        elif last_saru:
-            search_term = self._last_saru["original"]
+        elif last_sdata:
+            search_term = self._last_sdata.original
         if search_term:
             webbrowser.open(url + search_term)
 
@@ -98,26 +98,26 @@ class Watcher(threading.Thread):
             path = take_screenshot_clip_only(
                 self._options.NotesFolder, self._secondary_clip
             )
-            saru = process_image_light(path, self._options, self._recognizer)
-            if saru:
-                self._logger.debug("secondary clip: %s", saru["original"])
+            sdata = process_image_light(path, self._options, self._recognizer)
+            if sdata:
+                self._logger.debug("secondary clip: %s", sdata.original)
         self._secondary_clip = None
 
         (full_path, text_path) = take_screenshots(
             self._options.NotesFolder, self._saved_clip
         )
-        saru = process_image(self._options, self._recognizer, full_path, text_path)
-        if saru:
-            self._last_saru = saru
+        sdata = process_image(self._options, self._recognizer, full_path, text_path)
+        if sdata:
+            self._last_sdata = sdata
             self._update_watch()
             self._overlay.draw(
-                lambda c: draw(c, self._options, self._saved_clip, saru)
+                lambda c: draw(c, self._options, self._saved_clip, sdata)
             )  # TODO: draw secondary data, if present
 
     def _update_hover(self):
         """Check if the mouse cursor is hovering over a token, and if so save the token"""
-        if self._saved_clip and self._last_saru:
-            hover = self._find_hover(self._saved_clip, self._last_saru["tokens"])
+        if self._saved_clip and self._last_sdata:
+            hover = self._find_hover(self._saved_clip, self._last_sdata.tokens)
             if hover != self._last_hover:
                 self._last_hover = hover
                 self._logger.info(
@@ -182,17 +182,17 @@ class Watcher(threading.Thread):
 
         self._save_clips()
 
-    def _get_first_non_punct(self, saru):
-        first_line = saru["cdata"][0]
+    def _get_first_non_punct(self, sdata):
+        first_line = sdata.cdata[0]
         for cdata in first_line:
             if not is_punctuation(cdata.text):
                 return cdata
         return None
 
-    def _get_watch_regions(self, saru):
+    def _get_watch_regions(self, sdata):
         watches = []
 
-        blocks = saru["raw_data"].blocks
+        blocks = sdata.raw_data.blocks
         # find largest block
         block = max(blocks, key=lambda block: block.width * block.height)
         # find middle char in block
@@ -200,9 +200,9 @@ class Watcher(threading.Thread):
         middle = line[trunc(len(line) / 2)]
         watches.append(middle)
 
-        first = self._get_first_non_punct(saru)
+        first = self._get_first_non_punct(sdata)
         if first is None:
-            first = saru["cdata"][0][0]
+            first = sdata.cdata[0][0]
             self._logger.warn(
                 "failed to find non punctuation, using first character for watch: %s",
                 first,
@@ -228,7 +228,7 @@ class Watcher(threading.Thread):
         return regions
 
     def _update_watch(self):
-        new_watch_regions = self._get_watch_regions(self._last_saru)
+        new_watch_regions = self._get_watch_regions(self._last_sdata)
         if len(new_watch_regions) > 0:
             self._watch_regions = new_watch_regions
             self._watch_paths = take_watch_screenshot(

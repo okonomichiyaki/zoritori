@@ -15,14 +15,14 @@ def draw(c, options, clip, saru):
     if options.debug:
         paint = skia.Paint(Color=skia.ColorBLUE, Style=skia.Paint.kStroke_Style)
         c.drawRect(clip, paint)
-    if saru["cdata"]:
-        draw_low_confidence(c, clip, saru["cdata"], 50)
+    if saru.cdata:
+        draw_low_confidence(c, clip, saru.cdata, 50)
 
-    if options.debug and saru["raw_data"].blocks:
-        draw_block_boxes(c, clip, saru["raw_data"].blocks)
+    if options.debug and saru.raw_data.blocks:
+        draw_block_boxes(c, clip, saru.raw_data.blocks)
 
-    if saru["furigana"]:
-        draw_furigana(c, options, clip, saru["furigana"])
+    if saru.furigana:
+        draw_furigana(c, options, clip, saru.furigana)
 
 
 #    if saru["translation"]:
@@ -91,7 +91,7 @@ def draw_parts_of_speech(c, clip, saru):
     paint = skia.Paint(
         Style=skia.Paint.kStroke_Style, StrokeWidth=3.0
     )  # TODO: magic number
-    for t in saru["tokens"]:
+    for t in saru.tokens:
         if t.part_of_speech(2) == "人名":
             paint.setColor(skia.ColorSetARGB(0xFF, 0x35, 0xA1, 0x6B))
         elif t.part_of_speech(2) == "地名":

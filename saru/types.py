@@ -26,9 +26,11 @@ class Box:
     width: int
     height: int
 
+    @property
     def x(self):
         return self.left
 
+    @property
     def y(self):
         return self.top
 
@@ -97,20 +99,6 @@ class BlockData:
     @property
     def height(self):
         return self.box.height
-
-
-@dataclass
-class RecognizeData:
-    """Response data from OCR engine"""
-
-    lines: list[list[CharacterData]]
-    blocks: list[BlockData]
-
-    def lines(self):
-        return self.lines
-
-    def blocks(self):
-        return self.blocks
 
 
 class MergedName:
@@ -200,3 +188,29 @@ class Token:
         if all_kana(self._morpheme.surface()):
             return False
         return True
+
+
+@dataclass
+class RawData:
+    """Response data from OCR engine"""
+
+    lines: list[list[CharacterData]]
+    blocks: list[BlockData]
+
+    def lines(self):
+        return self.lines
+
+    def blocks(self):
+        return self.blocks
+
+
+@dataclass
+class SaruData:
+    """Enriched data from tokenization, translation, etc."""
+
+    original: str
+    translation: str
+    cdata: list[list[CharacterData]]
+    tokens: list[Token]
+    furigana: list[Furigana]
+    raw_data: RawData
