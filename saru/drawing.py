@@ -9,26 +9,22 @@ from saru.strings import is_ascii
 _logger = logging.getLogger("saru")
 
 
-def draw(c, options, clip, saru):
+def draw(c, options, clip, sdata):
     if options.parts_of_speech:
-        draw_parts_of_speech(c, clip, saru)
+        draw_parts_of_speech(c, clip, sdata)
     if options.debug:
         paint = skia.Paint(Color=skia.ColorBLUE, Style=skia.Paint.kStroke_Style)
         c.drawRect(clip, paint)
-    if saru.cdata:
-        draw_low_confidence(c, clip, saru.cdata, 50)
-
-    if options.debug and saru.raw_data.blocks:
-        draw_block_boxes(c, clip, saru.raw_data.blocks)
-
-    if saru.furigana:
-        draw_furigana(c, options, clip, saru.furigana)
-
-
-#    if saru["translation"]:
-#        draw_subtitles(c, options, saru["translation"])
-#    elif options.debug and saru["original"]:
-#        draw_subtitles(c, options, saru["original"])
+    if sdata.cdata:
+        draw_low_confidence(c, clip, sdata.cdata, 50)
+    if options.debug and sdata.raw_data.blocks:
+        draw_block_boxes(c, clip, sdata.raw_data.blocks)
+    if sdata.furigana:
+        draw_furigana(c, options, clip, sdata.furigana)
+    if sdata.translation:
+        draw_subtitles(c, options, sdata.translation)
+    elif options.debug and sdata.original:
+        draw_subtitles(c, options, sdata.original)
 
 
 def draw_subtitles(c, options, text, xd=0, yd=0):
@@ -87,11 +83,11 @@ def shift(a, b):
     return skia.Rect.MakeXYWH(a.x() + b.x(), a.y() + b.y(), a.width(), a.height())
 
 
-def draw_parts_of_speech(c, clip, saru):
+def draw_parts_of_speech(c, clip, sdata):
     paint = skia.Paint(
         Style=skia.Paint.kStroke_Style, StrokeWidth=3.0
     )  # TODO: magic number
-    for t in saru.tokens:
+    for t in sdata.tokens:
         if t.part_of_speech(2) == "人名":
             paint.setColor(skia.ColorSetARGB(0xFF, 0x35, 0xA1, 0x6B))
         elif t.part_of_speech(2) == "地名":
