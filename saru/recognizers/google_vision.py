@@ -1,4 +1,5 @@
 import logging
+import time
 import io
 import os
 import sys
@@ -8,6 +9,9 @@ from google.cloud import vision_v1 as vision
 
 from saru.types import CharacterData, BlockData, RawData, Box
 from saru.recognizers.exceptions import RecognizerException
+
+
+_logger = logging.getLogger("saru")
 
 
 class Recognizer:
@@ -23,7 +27,10 @@ class Recognizer:
             content = image_file.read()
         image = vision.Image(content=content)
         try:
+            start = time.perf_counter()
             response = self._client.text_detection(image=image)
+            elapsed = time.perf_counter() - start
+            _logger.debug("received response from google vision in %.2f", elapsed)
             if response.error.message:
                 raise RecognizerException(
                     "Google Cloud Vision response contained error message: "

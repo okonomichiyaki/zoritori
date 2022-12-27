@@ -40,9 +40,9 @@ class Overlay:
         window = glfw.create_window(width - 1, height - 1, self._title, None, None)
 
         def key_callback(window, key, scancode, action, mods):
-            self._logger.debug(
-                f"key_callback: key={key} scancode={scancode} action={action}"
-            )
+            # self._logger.debug(
+            #    f"key_callback: key={key} scancode={scancode} action={action}"
+            # )
             if action == glfw.RELEASE:
                 if key == glfw.KEY_R or key == glfw.KEY_Q:
                     clip = self._get_clip(window)

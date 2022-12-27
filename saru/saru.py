@@ -70,6 +70,7 @@ def _recognize_tokenize_translate(options, recognizer, filename):
     should_translate = options.translate
     furigana_level = options.furigana
 
+    _logger.debug("recognizing...")
     raw_data = recognizer.recognize(filename)
     ldata = raw_data.lines
     text = _get_text(ldata)
@@ -78,11 +79,13 @@ def _recognize_tokenize_translate(options, recognizer, filename):
     #        _logger.debug("got junk: %s", text)
     #        return None
 
+    _logger.debug("tokenizing...")
     tokens = tokenize(text, ldata)
     furigana = _get_furigana(tokens, ldata, furigana_level)
 
     translation = None
     if should_translate:
+        _logger.debug("translating...")
         translation = translate(text, options.DeepLUrl, options.DeepLKey)
 
     return SaruData(text, translation, ldata, tokens, furigana, raw_data)
