@@ -6,10 +6,9 @@ import time
 import webbrowser
 from pathlib import Path
 from math import trunc
+from dataclasses import dataclass
 
-import skia
 import glfw
-import pyautogui
 
 from saru.overlay import Overlay
 from saru.drawing import draw
@@ -23,6 +22,8 @@ from saru.saru import process_image, process_image_light
 from saru.vocabulary import save_vocabulary
 from saru.strings import is_punctuation
 from saru.files import load_json, save_json
+from saru.types import SaruData
+from saru.clips import save_clips, load_clips, find_hover
 
 
 class Watcher(threading.Thread):
@@ -118,46 +119,12 @@ class Watcher(threading.Thread):
     def _update_hover(self):
         """Check if the mouse cursor is hovering over a token, and if so save the token"""
         if self._saved_clip and self._last_sdata:
-            hover = self._find_hover(self._saved_clip, self._last_sdata.tokens)
+            hover = find_hover(self._saved_clip, self._last_sdata.tokens)
             if hover != self._last_hover:
                 self._last_hover = hover
                 self._logger.info(
                     f"hovered token: {hover.surface() if hover else None}"
                 )
-
-    def _find_hover(self, clip, tokens):
-        for t in tokens:
-            if self._is_mouse_inside(clip, t.box()):
-                return t
-        return None
-
-    def _is_mouse_inside(self, clip, rect):
-        shifted = skia.Rect.MakeXYWH(
-            clip.x() + rect.x(), clip.y() + rect.y(), rect.width(), rect.height()
-        )
-        pos = pyautogui.position()
-        pixel = skia.Rect.MakeXYWH(pos.x, pos.y, 1, 1)
-        return shifted.intersect(pixel)
-
-    def _load_clips(self):
-        clips = load_json(self._clips_path)
-        if clips and len(clips) > 0:
-            clip = clips[0]
-            self._saved_clip = skia.Rect.MakeXYWH(
-                clip["x"], clip["y"], clip["w"], clip["h"]
-            )
-
-    def _save_clips(self):
-        if not self._saved_clip:
-            return
-        clip = {
-            "x": self._saved_clip.x(),
-            "y": self._saved_clip.y(),
-            "w": self._saved_clip.width(),
-            "h": self._saved_clip.height(),
-        }
-        clips = [clip]
-        save_json(self._clips_path, clips)
 
     def _any_clip(self):
         return self._saved_clip or self._secondary_clip
@@ -165,7 +132,7 @@ class Watcher(threading.Thread):
     def run(self):
         """Primary watch loop, periodically takes screenshots and reprocesses text"""
 
-        self._load_clips()
+        self._saved_clip = load_clips(self._clips_path)
 
         while not self._stop_flag.is_set():
             try:
@@ -186,7 +153,7 @@ class Watcher(threading.Thread):
                     self._overlay.stop()
             self._update_hover()
 
-        self._save_clips()
+        save_clips(self._saved_clip, self._clips_path)
 
     def _get_first_non_punct(self, sdata):
         first_line = sdata.cdata[0]
