@@ -26,7 +26,7 @@ def _parse(body):
 def _fetch(text, url, key):
     """Makes HTTP POST request to DeepL translation API, returns JSON string"""
     data = parse.urlencode(
-        {"auth_key": key, "text": text, "target_lang": "EN"}
+        {"auth_key": key, "text": text, "target_lang": "EN", "source_lang": "JA"}
     ).encode()
     req = request.Request(url, data=data)
     try:
