@@ -132,7 +132,8 @@ def draw_furigana(c, size, clip, fs):
         width = font.measureText(text)
         x = x - width / 2
         # y parameter to draw_text appears to be the baseline, and text is drawn above it
-        c.drawString(text, x, y - 4, font, FILL_BLACK)  # TODO: magic number
+        buffer = size / 4
+        c.drawString(text, x, y - buffer, font, FILL_BLACK)
 
 
 def shift(a, b):
