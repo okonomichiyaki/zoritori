@@ -38,8 +38,9 @@ class RenderState:
     subtitle_size: int
     subtitle_margin: int
     furigana_size: int
-    sdata: SaruData
+    primary_data: SaruData
     primary_clip: skia.Rect
+    secondary_data: list[str]
     secondary_clip: skia.Rect
 
 
@@ -122,6 +123,7 @@ class Watcher(threading.Thread):
             None,
             None,
             None,
+            None,
         )
         if self._secondary_clip:
             path = take_screenshot_clip_only(
@@ -130,7 +132,7 @@ class Watcher(threading.Thread):
             sdata = process_image_light(path, self._options, self._recognizer)
             if sdata:
                 self._logger.debug("secondary clip: %s", sdata.original)
-                dictionary.debug(sdata.original)
+                render_state.secondary_data = dictionary.lookup(sdata.original)
                 render_state.secondary_clip = self._secondary_clip
             self._secondary_clip = None
 
@@ -143,7 +145,7 @@ class Watcher(threading.Thread):
                 self._last_sdata = sdata
                 self._update_watch()
                 render_state.primary_clip = self._saved_clip
-                render_state.sdata = sdata
+                render_state.primary_data = sdata
                 self._overlay.draw(lambda c: draw(c, render_state))
 
     def _update_hover(self):

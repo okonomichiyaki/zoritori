@@ -10,19 +10,29 @@ _logger = logging.getLogger("saru")
 
 
 def draw(c, render_state):
-    sdata = render_state.sdata
+    sdata = render_state.primary_data
     clip = render_state.primary_clip
+    secondary_clip = render_state.secondary_clip
+    secondary_data = render_state.secondary_data
+
     if render_state.parts_of_speech:
         draw_parts_of_speech(c, clip, sdata)
+
     if render_state.debug:
         paint = skia.Paint(Color=skia.ColorBLUE, Style=skia.Paint.kStroke_Style)
         c.drawRect(clip, paint)
+        if secondary_clip:
+            c.drawRect(secondary_clip, paint)
+
     if sdata.cdata:
         draw_low_confidence(c, clip, sdata.cdata, 50)
+
     if render_state.debug and sdata.raw_data.blocks:
         draw_block_boxes(c, clip, sdata.raw_data.blocks)
+
     if sdata.furigana:
         draw_furigana(c, render_state.furigana_size, clip, sdata.furigana)
+
     if sdata.translation:
         draw_subtitles(
             c,
@@ -35,32 +45,55 @@ def draw(c, render_state):
             c, render_state.subtitle_size, render_state.subtitle_margin, sdata.original
         )
 
+    if secondary_data:
+        draw_subtitles(
+            c,
+            render_state.subtitle_size,
+            render_state.subtitle_margin,
+            "\n".join(secondary_data),
+            x0=secondary_clip.x() + secondary_clip.width() / 2,
+            y0=secondary_clip.y() + secondary_clip.height(),
+            direction=1,
+        )
 
-def draw_subtitles(c, subtitle_size, subtitle_margin, text, xd=0, yd=0):
+
+def draw_subtitles(
+    c, subtitle_size, subtitle_margin, text, x0=-1, y0=-1, xd=0, yd=0, direction=-1
+):
     layer_size = c.getBaseLayerSize()
     screen_width = layer_size.width()
     screen_height = layer_size.height()
     if not text or len(text) == 0:
         return
-    typeface = None
-    if is_ascii(text):
-        typeface = skia.Typeface("arial")
-    else:
-        typeface = skia.Typeface("meiryo")
     lines = text.split("\n")
     lines = map(lambda line: line.strip(), lines)
     lines = filter(lambda line: len(line) > 0, lines)
     lines = list(lines)
-    lines.reverse()
+    if direction < 0:
+        lines.reverse()
+    previous_height = 0
     for idx, line in enumerate(lines):
+        typeface = None
+        if is_ascii(line):
+            typeface = skia.Typeface("arial")
+        else:
+            typeface = skia.Typeface("meiryo")
         font = skia.Font(typeface, subtitle_size)
         paint = skia.Paint(
             AntiAlias=True, Style=skia.Paint.kFill_Style, Color=skia.ColorBLACK
         )
         w = font.measureText(line)
         height = font.getSpacing()
-        x = screen_width / 2 - (w + subtitle_margin) / 2 + xd
-        y = screen_height - (idx + 1) * (height + subtitle_margin) + yd
+        if x0 < 0:
+            x0 = screen_width / 2
+        if y0 < 0:
+            y0 = screen_height
+        x = x0 - (w + subtitle_margin) / 2 + xd
+        if direction < 0:
+            yshift = direction * (idx + 1) * (height + subtitle_margin)
+        else:
+            yshift = direction * idx * (previous_height + subtitle_margin)
+        y = y0 + yshift + yd
         h = height + subtitle_margin
         c.drawRect(skia.Rect.MakeXYWH(x, y, w, h), paint)
         paint = skia.Paint(
@@ -69,6 +102,7 @@ def draw_subtitles(c, subtitle_size, subtitle_margin, text, xd=0, yd=0):
         c.drawString(
             line, x + subtitle_margin / 2, y + height + subtitle_margin / 2, font, paint
         )
+        previous_height = height
 
 
 def draw_furigana(c, size, clip, fs):
