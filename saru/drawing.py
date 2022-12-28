@@ -101,6 +101,7 @@ def draw_subtitles(
         w = font.measureText(line)
         height = font.getSpacing()
         x = x0 - (w + subtitle_margin) / 2
+        # depending on the direction, shift vertically based on current line height or previous line height:
         if direction < 0:
             yshift = direction * (idx + 1) * (height + subtitle_margin)
         else:
