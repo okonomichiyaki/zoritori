@@ -9,6 +9,7 @@ from math import trunc
 from dataclasses import dataclass
 
 import glfw
+import skia
 
 from saru.overlay import Overlay
 from saru.drawing import draw
@@ -25,6 +26,21 @@ from saru.files import load_json, save_json
 from saru.types import SaruData
 from saru.clips import save_clips, load_clips, find_hover
 import saru.dictionary as dictionary
+
+
+@dataclass
+class RenderState:
+    """Snapshot of app state that gets drawn to the screen"""
+
+    translate: bool
+    debug: bool
+    parts_of_speech: bool
+    subtitle_size: int
+    subtitle_margin: int
+    furigana_size: int
+    sdata: SaruData
+    primary_clip: skia.Rect
+    secondary_clip: skia.Rect
 
 
 class Watcher(threading.Thread):
@@ -96,6 +112,17 @@ class Watcher(threading.Thread):
     def _process(self):
         """Take a fresh screenshot and process it. if relevant, trigger drawing and update watch"""
 
+        render_state = RenderState(
+            self._options.translate,
+            self._options.debug,
+            self._options.parts_of_speech,
+            self._options.SubtitleSize,
+            self._options.SubtitleMargin,
+            self._options.FuriganaSize,
+            None,
+            None,
+            None,
+        )
         if self._secondary_clip:
             path = take_screenshot_clip_only(
                 self._options.NotesFolder, self._secondary_clip
@@ -104,6 +131,7 @@ class Watcher(threading.Thread):
             if sdata:
                 self._logger.debug("secondary clip: %s", sdata.original)
                 dictionary.debug(sdata.original)
+                render_state.secondary_clip = self._secondary_clip
             self._secondary_clip = None
 
         if self._saved_clip:  # TODO: could check if this has changed
@@ -114,9 +142,9 @@ class Watcher(threading.Thread):
             if sdata:
                 self._last_sdata = sdata
                 self._update_watch()
-                self._overlay.draw(
-                    lambda c: draw(c, self._options, self._saved_clip, sdata)
-                )  # TODO: draw secondary data, if present
+                render_state.primary_clip = self._saved_clip
+                render_state.sdata = sdata
+                self._overlay.draw(lambda c: draw(c, render_state))
 
     def _update_hover(self):
         """Check if the mouse cursor is hovering over a token, and if so save the token"""

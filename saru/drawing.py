@@ -9,30 +9,37 @@ from saru.strings import is_ascii
 _logger = logging.getLogger("saru")
 
 
-def draw(c, options, clip, sdata):
-    if options.parts_of_speech:
+def draw(c, render_state):
+    sdata = render_state.sdata
+    clip = render_state.primary_clip
+    if render_state.parts_of_speech:
         draw_parts_of_speech(c, clip, sdata)
-    if options.debug:
+    if render_state.debug:
         paint = skia.Paint(Color=skia.ColorBLUE, Style=skia.Paint.kStroke_Style)
         c.drawRect(clip, paint)
     if sdata.cdata:
         draw_low_confidence(c, clip, sdata.cdata, 50)
-    if options.debug and sdata.raw_data.blocks:
+    if render_state.debug and sdata.raw_data.blocks:
         draw_block_boxes(c, clip, sdata.raw_data.blocks)
     if sdata.furigana:
-        draw_furigana(c, options, clip, sdata.furigana)
+        draw_furigana(c, render_state.furigana_size, clip, sdata.furigana)
     if sdata.translation:
-        draw_subtitles(c, options, sdata.translation)
-    elif options.debug and sdata.original:
-        draw_subtitles(c, options, sdata.original)
+        draw_subtitles(
+            c,
+            render_state.subtitle_size,
+            render_state.subtitle_margin,
+            sdata.translation,
+        )
+    elif render_state.debug and sdata.original:
+        draw_subtitles(
+            c, render_state.subtitle_size, render_state.subtitle_margin, sdata.original
+        )
 
 
-def draw_subtitles(c, options, text, xd=0, yd=0):
+def draw_subtitles(c, subtitle_size, subtitle_margin, text, xd=0, yd=0):
     layer_size = c.getBaseLayerSize()
     screen_width = layer_size.width()
     screen_height = layer_size.height()
-    subtitle_size = options.SubtitleSize
-    subtitle_margin = options.SubtitleMargin
     if not text or len(text) == 0:
         return
     typeface = None
@@ -64,7 +71,7 @@ def draw_subtitles(c, options, text, xd=0, yd=0):
         )
 
 
-def draw_furigana(c, options, clip, fs):
+def draw_furigana(c, size, clip, fs):
     for f in fs:
         text = f.reading
         x = clip.x() + f.x
@@ -72,7 +79,7 @@ def draw_furigana(c, options, clip, fs):
         paint = skia.Paint(AntiAlias=True, Color=skia.ColorBLACK)
         typeface = skia.Typeface("meiryo", skia.FontStyle.Bold())
         # "ms gothic"
-        font = skia.Font(typeface, options.FuriganaSize)
+        font = skia.Font(typeface, size)
         width = font.measureText(text)
         x = x - width / 2
         # y parameter to draw_text appears to be the baseline, and text is drawn above it

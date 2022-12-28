@@ -28,5 +28,8 @@ def lookup(s):
 
 def debug(s):
     results = lookup(s)
+    if not results:
+        _logger.debug("dictionary found nothing for %s", s)
+        return
     for result in results:
         _logger.debug(result)
