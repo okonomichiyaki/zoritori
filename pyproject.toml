@@ -17,6 +17,8 @@ glfw = "^2.5.3"
 opencv-python = "^4.6.0"
 google-cloud-vision = "^2.7.3"
 ConfigArgParse = "^1.5.3"
+jamdict = "^0.1a11"
+jamdict-data = "^1.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"

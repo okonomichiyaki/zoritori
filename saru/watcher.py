@@ -24,6 +24,7 @@ from saru.strings import is_punctuation
 from saru.files import load_json, save_json
 from saru.types import SaruData
 from saru.clips import save_clips, load_clips, find_hover
+import saru.dictionary as dictionary
 
 
 class Watcher(threading.Thread):
@@ -102,7 +103,8 @@ class Watcher(threading.Thread):
             sdata = process_image_light(path, self._options, self._recognizer)
             if sdata:
                 self._logger.debug("secondary clip: %s", sdata.original)
-        self._secondary_clip = None
+                dictionary.debug(sdata.original)
+            self._secondary_clip = None
 
         if self._saved_clip:  # TODO: could check if this has changed
             (full_path, text_path) = take_screenshots(
@@ -125,6 +127,8 @@ class Watcher(threading.Thread):
                 self._logger.info(
                     f"hovered token: {hover.surface() if hover else None}"
                 )
+                if hover:
+                    dictionary.debug(hover.surface())
 
     def _any_clip(self):
         return self._saved_clip or self._secondary_clip
