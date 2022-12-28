@@ -87,7 +87,7 @@ class Watcher(threading.Thread):
     def _open_search(self, url):
         if self._last_hover:
             search_term = self._last_hover.surface()
-        elif last_sdata:
+        elif self._last_sdata:
             search_term = self._last_sdata.original
         if search_term:
             webbrowser.open(url + search_term)
