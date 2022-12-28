@@ -107,6 +107,10 @@ class Watcher(threading.Thread):
                 self._open_search("https://ja.wikipedia.org/wiki/")
             case glfw.KEY_E:
                 self._open_search("https://en.wikipedia.org/w/index.php?search=")
+            case glfw.KEY_MINUS:
+                self._options.FuriganaSize = self._options.FuriganaSize - 1
+            case glfw.KEY_EQUAL:
+                self._options.FuriganaSize = self._options.FuriganaSize + 1
             case _:
                 pass
 
