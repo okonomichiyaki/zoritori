@@ -73,11 +73,17 @@ def draw(c, render_state):
 def draw_subtitles(
     c, subtitle_size, subtitle_margin, text, x0=-1, y0=-1, direction=-1, debug=False
 ):
+    if not text or len(text) == 0:
+        return
     layer_size = c.getBaseLayerSize()
     screen_width = layer_size.width()
     screen_height = layer_size.height()
-    if not text or len(text) == 0:
-        return
+    if x0 < 0:
+        x0 = screen_width / 2
+    if y0 < 0:
+        y0 = screen_height
+    if debug:
+        draw_laser_point(c, x0, y0)
     lines = text.split("\n")
     lines = map(lambda line: line.strip(), lines)
     lines = filter(lambda line: len(line) > 0, lines)
@@ -94,10 +100,6 @@ def draw_subtitles(
         font = skia.Font(typeface, subtitle_size)
         w = font.measureText(line)
         height = font.getSpacing()
-        if x0 < 0:
-            x0 = screen_width / 2
-        if y0 < 0:
-            y0 = screen_height
         x = x0 - (w + subtitle_margin) / 2
         if direction < 0:
             yshift = direction * (idx + 1) * (height + subtitle_margin)
