@@ -6,6 +6,14 @@ import skia
 from saru.strings import is_ascii
 
 
+FILL_BLACK = skia.Paint(Style=skia.Paint.kFill_Style, Color=skia.ColorBLACK)
+FILL_WHITE = skia.Paint(Style=skia.Paint.kFill_Style, Color=skia.ColorWHITE)
+FILL_RED = skia.Paint(Style=skia.Paint.kFill_Style, Color=skia.ColorRED)
+STROKE_BLUE = skia.Paint(Style=skia.Paint.kStroke_Style, Color=skia.ColorBLUE)
+STROKE_GREEN = skia.Paint(Style=skia.Paint.kStroke_Style, Color=skia.ColorGREEN)
+STROKE_RED = skia.Paint(Style=skia.Paint.kStroke_Style, Color=skia.ColorRED)
+
+
 _logger = logging.getLogger("saru")
 
 
@@ -19,10 +27,9 @@ def draw(c, render_state):
         draw_parts_of_speech(c, clip, sdata)
 
     if render_state.debug:
-        paint = skia.Paint(Color=skia.ColorBLUE, Style=skia.Paint.kStroke_Style)
-        c.drawRect(clip, paint)
+        c.drawRect(clip, STROKE_BLUE)
         if secondary_clip:
-            c.drawRect(secondary_clip, paint)
+            c.drawRect(secondary_clip, STROKE_BLUE)
 
     if sdata.cdata:
         draw_low_confidence(c, clip, sdata.cdata, 50)
@@ -39,10 +46,15 @@ def draw(c, render_state):
             render_state.subtitle_size,
             render_state.subtitle_margin,
             sdata.translation,
+            debug=render_state.debug,
         )
     elif render_state.debug and sdata.original:
         draw_subtitles(
-            c, render_state.subtitle_size, render_state.subtitle_margin, sdata.original
+            c,
+            render_state.subtitle_size,
+            render_state.subtitle_margin,
+            sdata.original,
+            debug=render_state.debug,
         )
 
     if secondary_data:
@@ -54,10 +66,13 @@ def draw(c, render_state):
             x0=secondary_clip.x() + secondary_clip.width() / 2,
             y0=secondary_clip.y() + secondary_clip.height(),
             direction=1,
+            debug=render_state.debug,
         )
 
 
-def draw_subtitles(c, subtitle_size, subtitle_margin, text, x0=-1, y0=-1, direction=-1):
+def draw_subtitles(
+    c, subtitle_size, subtitle_margin, text, x0=-1, y0=-1, direction=-1, debug=False
+):
     layer_size = c.getBaseLayerSize()
     screen_width = layer_size.width()
     screen_height = layer_size.height()
@@ -77,9 +92,6 @@ def draw_subtitles(c, subtitle_size, subtitle_margin, text, x0=-1, y0=-1, direct
         else:
             typeface = skia.Typeface("meiryo")
         font = skia.Font(typeface, subtitle_size)
-        paint = skia.Paint(
-            AntiAlias=True, Style=skia.Paint.kFill_Style, Color=skia.ColorBLACK
-        )
         w = font.measureText(line)
         height = font.getSpacing()
         if x0 < 0:
@@ -93,12 +105,15 @@ def draw_subtitles(c, subtitle_size, subtitle_margin, text, x0=-1, y0=-1, direct
             yshift = direction * idx * (previous_height + subtitle_margin)
         y = y0 + yshift
         h = height + subtitle_margin
-        c.drawRect(skia.Rect.MakeXYWH(x, y, w, h), paint)
-        paint = skia.Paint(
-            AntiAlias=True, Style=skia.Paint.kFill_Style, Color=skia.ColorWHITE
-        )
+        if debug:
+            draw_laser_point(c, x, y)
+        c.drawRect(skia.Rect.MakeXYWH(x, y, w, h), FILL_BLACK)
         c.drawString(
-            line, x + subtitle_margin / 2, y + height + subtitle_margin / 2, font, paint
+            line,
+            x + subtitle_margin / 2,
+            y + height + subtitle_margin / 2,
+            font,
+            FILL_WHITE,
         )
         previous_height = height
 
@@ -108,14 +123,13 @@ def draw_furigana(c, size, clip, fs):
         text = f.reading
         x = clip.x() + f.x
         y = clip.y() + f.y
-        paint = skia.Paint(AntiAlias=True, Color=skia.ColorBLACK)
         typeface = skia.Typeface("meiryo", skia.FontStyle.Bold())
         # "ms gothic"
         font = skia.Font(typeface, size)
         width = font.measureText(text)
         x = x - width / 2
         # y parameter to draw_text appears to be the baseline, and text is drawn above it
-        c.drawString(text, x, y - 4, font, paint)  # TODO: magic number
+        c.drawString(text, x, y - 4, font, FILL_BLACK)  # TODO: magic number
 
 
 def shift(a, b):
@@ -143,18 +157,16 @@ def cdata_to_rect(cdata):
 
 
 def draw_character_boxes(c, clip, lines):
-    paint = skia.Paint(Color=skia.ColorGREEN, Style=skia.Paint.kStroke_Style)
     for line in lines:
         for cdata in line:
             rect = shift(cdata_to_rect(cdata), clip)
-            c.drawRect(rect, paint)
+            c.drawRect(rect, STROKE_GREEN)
 
 
 def draw_block_boxes(c, clip, blocks):
-    paint = skia.Paint(Color=skia.ColorGREEN, Style=skia.Paint.kStroke_Style)
     for block in blocks:
         rect = shift(cdata_to_rect(block), clip)
-        c.drawRect(rect, paint)
+        c.drawRect(rect, STROKE_GREEN)
 
 
 def draw_low_confidence(c, clip, lines, threshold=50):
@@ -167,5 +179,9 @@ def draw_low_confidence(c, clip, lines, threshold=50):
         x = clip.x() + box.left + box.width / 2
         y = clip.y() + box.top + box.height / 2
         radius = box.width / 2
-        paint = skia.Paint(Color=skia.ColorRED, Style=skia.Paint.kStroke_Style)
-        c.drawCircle(x, y, radius, paint)
+        c.drawCircle(x, y, radius, STROKE_RED)
+
+
+def draw_laser_point(c, x, y):
+    radius = 2
+    c.drawCircle(x, y, radius, FILL_RED)
