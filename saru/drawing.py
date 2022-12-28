@@ -57,9 +57,7 @@ def draw(c, render_state):
         )
 
 
-def draw_subtitles(
-    c, subtitle_size, subtitle_margin, text, x0=-1, y0=-1, xd=0, yd=0, direction=-1
-):
+def draw_subtitles(c, subtitle_size, subtitle_margin, text, x0=-1, y0=-1, direction=-1):
     layer_size = c.getBaseLayerSize()
     screen_width = layer_size.width()
     screen_height = layer_size.height()
@@ -88,12 +86,12 @@ def draw_subtitles(
             x0 = screen_width / 2
         if y0 < 0:
             y0 = screen_height
-        x = x0 - (w + subtitle_margin) / 2 + xd
+        x = x0 - (w + subtitle_margin) / 2
         if direction < 0:
             yshift = direction * (idx + 1) * (height + subtitle_margin)
         else:
             yshift = direction * idx * (previous_height + subtitle_margin)
-        y = y0 + yshift + yd
+        y = y0 + yshift
         h = height + subtitle_margin
         c.drawRect(skia.Rect.MakeXYWH(x, y, w, h), paint)
         paint = skia.Paint(
