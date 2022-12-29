@@ -204,6 +204,9 @@ class Watcher(threading.Thread):
         watches = []
 
         blocks = sdata.raw_data.blocks
+        if len(blocks) < 1:
+            return []
+
         # find largest block
         block = max(blocks, key=lambda block: block.width * block.height)
         # find middle char in block
@@ -242,11 +245,16 @@ class Watcher(threading.Thread):
         new_watch_regions = self._get_watch_regions(self._last_sdata)
         if len(new_watch_regions) > 0:
             self._watch_regions = new_watch_regions
-            self._watch_paths = take_watch_screenshot(
-                self._options.NotesFolder, self._watch_regions
-            )
         else:
-            self._logger.warn("failed to find watch regions")
+            self._logger.warn("failed to find watch regions, using whole clip")
+            x = self._saved_clip.x()
+            y = self._saved_clip.y()
+            w = self._saved_clip.width()
+            h = self._saved_clip.height()
+            self._watch_regions = [(x, y, w, h)]
+        self._watch_paths = take_watch_screenshot(
+            self._options.NotesFolder, self._watch_regions
+        )
 
     def _has_screen_changed(self):
         if self._options.no_watch:

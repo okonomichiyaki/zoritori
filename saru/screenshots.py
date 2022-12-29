@@ -36,24 +36,26 @@ def take_screenshot_clip_only(folder: str, clip: skia.Rect):
     return path
 
 
-# returns (left, top, width, height) or None
-def locate(path):
+def locate_on_screen(path):
+    """Wrapper around pyautogui.locateOnscreen. returns (left, top, width, height) or None"""
     try:
         return pyautogui.locateOnScreen(path, confidence=0.9, grayscale=True)
     except pyautogui.ImageNotFoundException:
         return None
 
 
+def locate(path, path2):
+    """Wrapper around pyautogui.locate. returns (left, top, width, height) or None"""
+    try:
+        return pyautogui.locate(path, path2, confidence=0.9, grayscale=True)
+    except pyautogui.ImageNotFoundException:
+        return None
+
+
 def screen_changed(folder, paths, regions):
-    assert len(paths) == len(
-        regions
-    ), f"number of paths and regions differed: {paths} {regions}"
     for i, path in enumerate(paths):
         path2 = get_path(folder, "screenshot", "png", title=f"watch_{i}_test")
         pyautogui.screenshot(path2, region=regions[i])
-        try:
-            if not pyautogui.locate(path, path2, grayscale=False):
-                return True
-        except pyautogui.ImageNotFoundException:
+        if not locate(path, path2):
             return True
     return False
