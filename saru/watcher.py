@@ -134,7 +134,7 @@ class Watcher(threading.Thread):
                 self._options.NotesFolder, self._secondary_clip
             )
             sdata = process_image_light(path, self._options, self._recognizer)
-            if sdata:
+            if sdata and len(sdata.original) > 0:
                 self._logger.debug("secondary clip: %s", sdata.original)
                 render_state.secondary_data = dictionary.lookup(sdata.original)
                 render_state.secondary_clip = self._secondary_clip

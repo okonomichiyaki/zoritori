@@ -47,7 +47,10 @@ class Overlay:
                 if key == glfw.KEY_R or key == glfw.KEY_Q:
                     clip = self._get_clip(window)
                     self._start_pos = None
-                    self._event_queue.put_nowait(ClipEvent(key, clip))
+                    if clip.width() > 0 and clip.height() > 0:
+                        self._event_queue.put_nowait(ClipEvent(key, clip))
+                    else:
+                        self._event_queue.put_nowait(KeyEvent(key))
                 else:
                     self._event_queue.put_nowait(KeyEvent(key))
             elif action == glfw.PRESS and (glfw.KEY_R == key or glfw.KEY_Q == key):
