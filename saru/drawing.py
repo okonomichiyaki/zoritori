@@ -141,9 +141,10 @@ def shift(a, b):
 
 
 def draw_parts_of_speech(c, clip, sdata):
+    part_of_speech_border_width = 3.0  # TODO: magic number
     paint = skia.Paint(
-        Style=skia.Paint.kStroke_Style, StrokeWidth=3.0
-    )  # TODO: magic number
+        Style=skia.Paint.kStroke_Style, StrokeWidth=part_of_speech_border_width
+    )
     for t in sdata.tokens:
         if t.part_of_speech(2) == "人名":
             paint.setColor(skia.ColorSetARGB(0xFF, 0x35, 0xA1, 0x6B))
