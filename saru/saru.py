@@ -119,10 +119,10 @@ def process_image(options, recognizer, full_path, text_path):
     cleaned_up = text
     for c in ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "\n"]:
         cleaned_up = cleaned_up.replace(c, "-")
-    #    new_path = full_path.replace("xxxxx", cleaned_up)
-    #    os.rename(full_path, new_path)
-    #    if not save_vocabulary(options.NotesFolder, saru["tokens"], new_path):
-    #        os.remove(new_path)
+    new_path = full_path.replace("xxxxx", cleaned_up)
+    os.rename(full_path, new_path)
+    if not save_vocabulary(options.NotesFolder, saru.tokens, new_path):
+        os.remove(new_path)
     if options.debug:
         log_debug(saru)
     return saru
