@@ -72,12 +72,12 @@ def _recognize_tokenize_translate(options, recognizer, filename):
 
     _logger.debug("recognizing...")
     raw_data = recognizer.recognize(filename)
-    ldata = raw_data.lines
+    ldata = raw_data.get_lines()
     text = _get_text(ldata)
 
-    #    if _is_junk(ldata):
-    #        _logger.debug("got junk: %s", text)
-    #        return None
+    # if _is_junk(ldata):
+    #     _logger.debug("got junk: %s", text)
+    #     return None
 
     _logger.debug("tokenizing...")
     tokens = tokenize(text, ldata)
@@ -109,13 +109,15 @@ def process_image_light(path, options, recognizer):
 
 def process_image(options, recognizer, full_path, text_path):
     """Processes an image for vocabulary collection and saving screenshots"""
-    saru = _recognize_tokenize_translate(options, recognizer, text_path)
+    saru = _recognize_tokenize_translate(options, recognizer, text_path or full_path)
     if saru is None:
-        os.remove(text_path)
+        if text_path:
+            os.remove(text_path)
         os.remove(full_path)
         return None
     text = saru.original
-    os.remove(text_path)
+    if text_path:
+        os.remove(text_path)
     cleaned_up = text
     for c in ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "\n"]:
         cleaned_up = cleaned_up.replace(c, "-")

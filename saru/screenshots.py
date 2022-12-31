@@ -30,6 +30,14 @@ def take_screenshots(folder: str, clip: skia.Rect):
     return (full_path, clip_path)
 
 
+def take_fullscreen_screenshot(folder: str):
+    full_path = get_path(
+        folder, "screenshot", "png", title="xxxxx", dated=True, timed=True
+    )
+    pyautogui.screenshot(full_path)
+    return full_path
+
+
 def take_screenshot_clip_only(folder: str, clip: skia.Rect):
     path = get_path(folder, "screenshot", "png", title="clip", dated=False, timed=False)
     pyautogui.screenshot(path, region=(clip.x(), clip.y(), clip.width(), clip.height()))

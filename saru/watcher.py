@@ -16,6 +16,7 @@ from saru.drawing import draw
 from saru.screenshots import (
     take_screenshots,
     take_watch_screenshot,
+    take_fullscreen_screenshot,
     screen_changed,
     take_screenshot_clip_only,
 )
@@ -32,6 +33,7 @@ import saru.dictionary as dictionary
 class RenderState:
     """Snapshot of app state that gets drawn to the screen"""
 
+    fullscreen: bool
     translate: bool
     debug: bool
     parts_of_speech: bool
@@ -118,6 +120,7 @@ class Watcher(threading.Thread):
         """Take a fresh screenshot and process it. if relevant, trigger drawing and update watch"""
 
         render_state = RenderState(
+            self._options.fullscreen,
             self._options.translate,
             self._options.debug,
             self._options.parts_of_speech,
@@ -151,6 +154,17 @@ class Watcher(threading.Thread):
                 render_state.primary_clip = self._saved_clip
                 render_state.primary_data = sdata
                 self._overlay.draw(lambda c: draw(c, render_state))
+        elif self._options.fullscreen:
+            full_path = take_fullscreen_screenshot(self._options.NotesFolder)
+            sdata = process_image(self._options, self._recognizer, full_path, None)
+            if sdata:
+                self._last_sdata = sdata
+                self._update_watch()
+                b = sdata.raw_data.get_primary_block()
+                rect = skia.Rect.MakeXYWH(b.box.x, b.box.y, b.box.width, b.box.height)
+                render_state.primary_clip = rect
+                render_state.primary_data = sdata
+                self._overlay.draw(lambda c: draw(c, render_state))
 
     def _update_hover(self):
         """Check if the mouse cursor is hovering over a token, and if so save the token"""
@@ -165,7 +179,7 @@ class Watcher(threading.Thread):
                     dictionary.debug(hover.surface())
 
     def _any_clip(self):
-        return self._saved_clip or self._secondary_clip
+        return self._saved_clip or self._secondary_clip or self._options.fullscreen
 
     def run(self):
         """Primary watch loop, periodically takes screenshots and reprocesses text"""
@@ -208,7 +222,8 @@ class Watcher(threading.Thread):
             return []
 
         # find largest block
-        block = max(blocks, key=lambda block: block.width * block.height)
+        block = sdata.raw_data.get_primary_block()
+
         # find middle char in block
         line = block.lines[trunc(len(block.lines) / 2)]
         middle = line[trunc(len(line) / 2)]
@@ -225,8 +240,10 @@ class Watcher(threading.Thread):
 
         regions = []
         for watch in watches:
-            x = self._saved_clip.x() + watch.left + self._WATCH_MARGIN
-            y = self._saved_clip.y() + watch.top + self._WATCH_MARGIN
+            x0 = (self._saved_clip and self._saved_clip.x()) or 0
+            y0 = (self._saved_clip and self._saved_clip.y()) or 0
+            x = x0 + watch.left + self._WATCH_MARGIN
+            y = y0 + watch.top + self._WATCH_MARGIN
             w = watch.width - self._WATCH_MARGIN * 2
             if w <= 0:
                 w = watch.width

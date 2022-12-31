@@ -76,6 +76,9 @@ class BlockData:
     lines: list[list[CharacterData]]
     box: Box
 
+    def char_count(self):
+        return sum(map(lambda line: len(line), self.lines))
+
     @property
     def x(self):
         return self.box.left
@@ -190,18 +193,37 @@ class Token:
         return True
 
 
-@dataclass
 class RawData:
     """Response data from OCR engine"""
 
-    lines: list[list[CharacterData]]
-    blocks: list[BlockData]
+    def __init__(self, lines, blocks):
+        self.lines = lines
+        self.blocks = blocks
+        self._primary_block = None
 
-    def lines(self):
-        return self.lines
+    def _find_primary_block(self):
+        if self._primary_block:
+            return
+        screen_height = 1080  # TODO: magic number
+        screen_width = 1920  # TODO: magic number
+        blocks = filter(lambda block: block.y > screen_height / 2, self.blocks)
+        # largest_by_pixels = max(self.blocks, key=lambda block: block.width * block.height)
+        # largest_by_chars = max(self.blocks, key=lambda block: block.char_count())
+        closest_to_center = min(
+            blocks, key=lambda block: abs(block.x + block.width / 2 - screen_width / 2)
+        )
+        self._primary_block = closest_to_center
 
-    def blocks(self):
-        return self.blocks
+    def get_primary_block(self):
+        self._find_primary_block()
+        return self._primary_block
+
+    def get_lines(self):
+        self._find_primary_block()
+        if self._primary_block:
+            return self._primary_block.lines
+        else:
+            return self.lines
 
 
 @dataclass

@@ -35,7 +35,7 @@ def draw(c, render_state):
         draw_low_confidence(c, clip, sdata.cdata, 50)
 
     if render_state.debug and sdata.raw_data.blocks:
-        draw_block_boxes(c, clip, sdata.raw_data.blocks)
+        draw_block_boxes(c, render_state.fullscreen, clip, sdata.raw_data.blocks)
 
     if sdata.furigana:
         draw_furigana(c, render_state.furigana_size, clip, sdata.furigana)
@@ -168,9 +168,11 @@ def draw_character_boxes(c, clip, lines):
             c.drawRect(rect, STROKE_GREEN)
 
 
-def draw_block_boxes(c, clip, blocks):
+def draw_block_boxes(c, fullscreen, clip, blocks):
     for block in blocks:
-        rect = shift(cdata_to_rect(block), clip)
+        rect = cdata_to_rect(block)
+        if not fullscreen:
+            rect = shift(rect, clip)
         c.drawRect(rect, STROKE_GREEN)
 
 
