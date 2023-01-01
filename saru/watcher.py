@@ -24,7 +24,7 @@ from saru.saru import process_image, process_image_light
 from saru.vocabulary import save_vocabulary
 from saru.strings import is_punctuation
 from saru.files import load_json, save_json
-from saru.types import SaruData
+from saru.types import SaruData, Box
 from saru.clips import save_clips, load_clips, find_hover
 import saru.dictionary as dictionary
 
@@ -41,9 +41,9 @@ class RenderState:
     subtitle_margin: int
     furigana_size: int
     primary_data: SaruData
-    primary_clip: skia.Rect
+    primary_clip: Box
     secondary_data: list[str]
-    secondary_clip: skia.Rect
+    secondary_clip: Box
 
 
 class Watcher(threading.Thread):
@@ -144,14 +144,11 @@ class Watcher(threading.Thread):
             self._secondary_clip = None
 
         if self._saved_clip:  # TODO: could check if this has changed
-            pos = self._overlay.get_window_pos()
             (full_path, text_path) = take_screenshots(
-                self._options.NotesFolder, self._saved_clip, pos
+                self._options.NotesFolder, self._saved_clip
             )
-            x = self._saved_clip.x()
-            y = self._saved_clip.y()
             sdata = process_image(
-                self._options, self._recognizer, full_path, text_path, x, y
+                self._options, self._recognizer, full_path, text_path, self._saved_clip
             )
             if sdata:
                 self._last_sdata = sdata
@@ -166,7 +163,9 @@ class Watcher(threading.Thread):
                 self._last_sdata = sdata
                 self._update_watch()
                 b = sdata.raw_data.get_primary_block()
-                rect = skia.Rect.MakeXYWH(b.box.x, b.box.y, b.box.width, b.box.height)
+                rect = skia.Rect.MakeXYWH(
+                    b.box.x, b.box.y, b.box.width, b.box.height
+                )  # screen coordinates
                 render_state.primary_clip = rect
                 render_state.primary_data = sdata
                 self._overlay.draw(lambda c: draw(c, render_state))
@@ -189,7 +188,7 @@ class Watcher(threading.Thread):
     def run(self):
         """Primary watch loop, periodically takes screenshots and reprocesses text"""
 
-        self._saved_clip = load_clips(self._clips_path)
+        #        self._saved_clip = load_clips(self._clips_path)
 
         while not self._stop_flag.is_set():
             try:
@@ -210,7 +209,7 @@ class Watcher(threading.Thread):
                     self._overlay.stop()
             self._update_hover()
 
-        save_clips(self._saved_clip, self._clips_path)
+    #        save_clips(self._saved_clip, self._clips_path)
 
     def _get_first_non_punct(self, sdata):
         first_line = sdata.cdata[0]
@@ -246,8 +245,8 @@ class Watcher(threading.Thread):
 
         regions = []
         for watch in watches:
-            x = watch.left + self._WATCH_MARGIN
-            y = watch.top + self._WATCH_MARGIN
+            x = watch.screenx + self._WATCH_MARGIN
+            y = watch.screeny + self._WATCH_MARGIN
             w = watch.width - self._WATCH_MARGIN * 2
             if w <= 0:
                 w = watch.width
@@ -270,10 +269,10 @@ class Watcher(threading.Thread):
             self._watch_regions = new_watch_regions
         else:
             self._logger.warn("failed to find watch regions, using whole clip")
-            x = self._saved_clip.x()
-            y = self._saved_clip.y()
-            w = self._saved_clip.width()
-            h = self._saved_clip.height()
+            x = self._saved_clip.screenx
+            y = self._saved_clip.screeny
+            w = self._saved_clip.width
+            h = self._saved_clip.height
             self._watch_regions = [(x, y, w, h)]
         self._watch_paths = take_watch_screenshot(
             self._options.NotesFolder, self._watch_regions

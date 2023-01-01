@@ -1,9 +1,9 @@
 import logging
 import pyautogui
-import skia
+from pathlib import Path
 
 from saru.files import get_path
-from saru.types import CharacterData
+from saru.types import CharacterData, Box
 
 
 _logger = logging.getLogger("saru")
@@ -13,23 +13,21 @@ def take_watch_screenshot(folder: str, regions):
     watch_paths = []
     for i, region in enumerate(regions):
         watch_path = get_path(folder, "screenshot", "png", title=f"watch_{i}_base")
+        Path(watch_path).unlink(missing_ok=True)
         pyautogui.screenshot(watch_path, region=region)
         watch_paths.append(watch_path)
     return watch_paths
 
 
-def take_screenshots(folder: str, clip: skia.Rect, pos=None):
+def take_screenshots(folder: str, clip: Box):
     full_path = get_path(
         folder, "screenshot", "png", title="xxxxx", dated=True, timed=True
     )
     pyautogui.screenshot(full_path)
     clip_path = get_path(folder, "screenshot", "png", title="text")
-    x = clip.x()
-    y = clip.y()
-    if pos:
-        x = x + pos[0]
-        y = y + pos[1]
-    pyautogui.screenshot(clip_path, region=(x, y, clip.width(), clip.height()))
+    pyautogui.screenshot(
+        clip_path, region=(clip.screenx, clip.screeny, clip.width, clip.height)
+    )
     return (full_path, clip_path)
 
 
@@ -41,9 +39,11 @@ def take_fullscreen_screenshot(folder: str):
     return full_path
 
 
-def take_screenshot_clip_only(folder: str, clip: skia.Rect):
+def take_screenshot_clip_only(folder: str, clip: Box):
     path = get_path(folder, "screenshot", "png", title="clip", dated=False, timed=False)
-    pyautogui.screenshot(path, region=(clip.x(), clip.y(), clip.width(), clip.height()))
+    pyautogui.screenshot(
+        path, region=(clip.screenx, clip.screeny, clip.width, clip.height)
+    )
     return path
 
 
@@ -66,6 +66,7 @@ def locate(path, path2):
 def screen_changed(folder, paths, regions):
     for i, path in enumerate(paths):
         path2 = get_path(folder, "screenshot", "png", title=f"watch_{i}_test")
+        Path(path2).unlink(missing_ok=True)
         pyautogui.screenshot(path2, region=regions[i])
         if not locate(path, path2):
             return True

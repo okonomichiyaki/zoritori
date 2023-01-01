@@ -13,26 +13,84 @@ _logger = logging.getLogger("saru")
 @dataclass
 class Furigana:
     reading: str
-    x: int
+    x: int  # TODO why does this class has its own coords
     y: int
 
 
 @dataclass
-class Box:
-    """Generic bounding box"""
+class Root:
+    """Origin parent context for boxes"""
 
-    left: int
-    top: int
-    width: int
-    height: int
+    screenx: int
+    screeny: int
+    clientx: int
+    clienty: int
+
+
+class Box:
+    """Generic rectangular box"""
+
+    def __init__(self, left, top, width, height, parent_context=None):
+        self._left = left
+        self._top = top
+        self._width = width
+        self._height = height
+        self._parent_context = parent_context
+
+    def to_skia_rect(self):
+        return skia.Rect.MakeXYWH(self.clientx, self.clienty, self.width, self.height)
+
+    @property
+    def screenx(self):
+        if self._parent_context:
+            return self._parent_context.screenx + self._left
+        else:
+            return self._left
+
+    @property
+    def screeny(self):
+        if self._parent_context:
+            return self._parent_context.screeny + self._top
+        else:
+            return self._top
+
+    @property
+    def clientx(self):
+        if self._parent_context:
+            return self._parent_context.clientx + self._left
+        else:
+            return self._left
+
+    @property
+    def clienty(self):
+        if self._parent_context:
+            return self._parent_context.clienty + self._top
+        else:
+            return self._top
 
     @property
     def x(self):
-        return self.left
+        return self._left
 
     @property
     def y(self):
-        return self.top
+        return self._top
+
+    @property
+    def left(self):
+        return self._left
+
+    @property
+    def top(self):
+        return self._top
+
+    @property
+    def width(self):
+        return self._width
+
+    @property
+    def height(self):
+        return self._height
 
 
 @dataclass
@@ -44,29 +102,12 @@ class CharacterData:
     conf: float
     box: Box
 
-    @property
-    def x(self):
-        return self.box.left
-
-    @property
-    def y(self):
-        return self.box.top
-
-    @property
-    def left(self):
-        return self.box.left
-
-    @property
-    def top(self):
-        return self.box.top
-
-    @property
-    def width(self):
-        return self.box.width
-
-    @property
-    def height(self):
-        return self.box.height
+    def __getattr__(self, name):
+        box_methods = [f for f in dir(Box) if not f.startswith("_")]
+        if name in box_methods:
+            return getattr(self.box, name)
+        else:
+            raise AttributeError
 
 
 @dataclass
@@ -79,29 +120,12 @@ class BlockData:
     def char_count(self):
         return sum(map(lambda line: len(line), self.lines))
 
-    @property
-    def x(self):
-        return self.box.left
-
-    @property
-    def y(self):
-        return self.box.top
-
-    @property
-    def left(self):
-        return self.box.left
-
-    @property
-    def top(self):
-        return self.box.top
-
-    @property
-    def width(self):
-        return self.box.width
-
-    @property
-    def height(self):
-        return self.box.height
+    def __getattr__(self, name):
+        box_methods = [f for f in dir(Box) if not f.startswith("_")]
+        if name in box_methods:
+            return getattr(self.box, name)
+        else:
+            raise AttributeError
 
 
 class MergedName:
@@ -147,7 +171,7 @@ class Token:
         top = self._cdata[0].top
         height = self._cdata[0].height
         width = self._cdata[-1].left + self._cdata[-1].width - left
-        return skia.Rect.MakeXYWH(left, top, width, height)
+        return skia.Rect.MakeXYWH(left, top, width, height)  # ??? coordinates
 
     def line_num(self):
         return self._line_num
@@ -204,13 +228,16 @@ class RawData:
     def _find_primary_block(self):
         if self._primary_block:
             return
+        if len(self.blocks) < 1:
+            return
         screen_height = 1080  # TODO: magic number
         screen_width = 1920  # TODO: magic number
-        blocks = filter(lambda block: block.y > screen_height / 2, self.blocks)
+        blocks = filter(lambda block: block.screeny > screen_height / 2, self.blocks)
         # largest_by_pixels = max(self.blocks, key=lambda block: block.width * block.height)
         # largest_by_chars = max(self.blocks, key=lambda block: block.char_count())
         closest_to_center = min(
-            blocks, key=lambda block: abs(block.x + block.width / 2 - screen_width / 2)
+            blocks,
+            key=lambda block: abs(block.screenx + block.width / 2 - screen_width / 2),
         )
         self._primary_block = closest_to_center
 

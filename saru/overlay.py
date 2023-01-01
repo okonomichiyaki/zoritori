@@ -8,6 +8,7 @@ import skia
 from OpenGL import GL
 
 from saru.events import KeyEvent, ClipEvent
+from saru.types import Box, Root
 
 
 class Overlay:
@@ -57,7 +58,7 @@ class Overlay:
                 if key == glfw.KEY_R or key == glfw.KEY_Q:
                     clip = self._get_clip(window)
                     self._start_pos = None
-                    if clip.width() > 0 and clip.height() > 0:
+                    if clip.width > 0 and clip.height > 0:
                         self._event_queue.put_nowait(ClipEvent(key, clip))
                     else:
                         self._event_queue.put_nowait(KeyEvent(key))
@@ -100,6 +101,10 @@ class Overlay:
         self._stop = True
         self.signal()
 
+    def _get_window_ctx(self):
+        (x, y) = glfw.get_window_pos(self._window)
+        return Root(x, y, 0, 0)
+
     def _get_clip(self, window):
         (startx, starty) = self._start_pos
         (endx, endy) = glfw.get_cursor_pos(window)
@@ -107,13 +112,14 @@ class Overlay:
         y = min(starty, endy)
         w = abs(endx - startx)
         h = abs(endy - starty)
-        return skia.Rect.MakeXYWH(x, y, w, h)
+        ctx = self._get_window_ctx()
+        return Box(x, y, w, h, ctx)
 
     def _draw_clip(self, window, surface, canvas):
         canvas.clear(skia.ColorTRANSPARENT)
         paint = skia.Paint(Color=skia.ColorGREEN, Style=skia.Paint.kStroke_Style)
         clip = self._get_clip(window)
-        canvas.drawRect(clip, paint)
+        canvas.drawRect(clip.to_skia_rect(), paint)
         surface.flushAndSubmit()
         glfw.swap_buffers(window)
 

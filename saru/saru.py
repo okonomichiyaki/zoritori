@@ -65,13 +65,13 @@ def _get_text(ldata):
     return "\n".join(lines)
 
 
-def _recognize_tokenize_translate(options, recognizer, filename, xdelta, ydelta):
+def _recognize_tokenize_translate(options, recognizer, filename, context):
     debug = options.debug
     should_translate = options.translate
     furigana_level = options.furigana
 
     _logger.debug("recognizing...")
-    raw_data = recognizer.recognize(filename, xdelta, ydelta)
+    raw_data = recognizer.recognize(filename, context)
     ldata = raw_data.get_lines()
     text = _get_text(ldata)
 
@@ -107,10 +107,10 @@ def process_image_light(path, options, recognizer):
     return saru
 
 
-def process_image(options, recognizer, full_path, text_path, xdelta=0, ydelta=0):
+def process_image(options, recognizer, full_path, text_path, context):
     """Processes an image for vocabulary collection and saving screenshots"""
     saru = _recognize_tokenize_translate(
-        options, recognizer, text_path or full_path, xdelta, ydelta
+        options, recognizer, text_path or full_path, context
     )
     if saru is None:
         if text_path:

@@ -20,8 +20,10 @@ _logger = logging.getLogger("saru")
 
 def draw(c, render_state):
     sdata = render_state.primary_data
-    clip = render_state.primary_clip
-    secondary_clip = render_state.secondary_clip
+    clip = render_state.primary_clip.to_skia_rect()
+    secondary_clip = (
+        render_state.secondary_clip and render_state.secondary_clip.to_skia_rect()
+    )
     secondary_data = render_state.secondary_data
 
     if render_state.parts_of_speech:
@@ -29,6 +31,7 @@ def draw(c, render_state):
 
     if render_state.debug:
         draw_laser_point(c, 0, 0)
+        draw_character_boxes(c, sdata.cdata)
         c.drawRect(clip, STROKE_BLUE)
         if secondary_clip:
             c.drawRect(secondary_clip, STROKE_BLUE)
@@ -156,21 +159,16 @@ def draw_parts_of_speech(c, sdata):
         c.drawRect(t.box(), paint)
 
 
-# TODO: rename this
-def cdata_to_rect(cdata):
-    return skia.Rect.MakeXYWH(cdata.left, cdata.top, cdata.width, cdata.height)
-
-
 def draw_character_boxes(c, lines):
     for line in lines:
         for cdata in line:
-            rect = cdata_to_rect(cdata)
+            rect = cdata.to_skia_rect()
             c.drawRect(rect, STROKE_GREEN)
 
 
 def draw_block_boxes(c, blocks):
     for block in blocks:
-        rect = cdata_to_rect(block)
+        rect = block.to_skia_rect()
         c.drawRect(rect, STROKE_GREEN)
 
 
