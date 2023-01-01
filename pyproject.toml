@@ -12,7 +12,7 @@ pytesseract = "^0.3.9"
 skia-python = "^87.4"
 SudachiPy = "^0.6.5"
 SudachiDict-core = "^20220519"
-pywin32 = "^304"
+pywin32 = {version = "^304", platform = "windows"}
 glfw = "^2.5.3"
 opencv-python = "^4.6.0"
 google-cloud-vision = "^2.7.3"

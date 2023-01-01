@@ -1,4 +1,5 @@
 import logging
+import platform
 from queue import Queue
 
 import contextlib
@@ -6,7 +7,6 @@ import glfw
 import skia
 from OpenGL import GL
 
-from saru.windows import enable_click_through
 from saru.events import KeyEvent, ClipEvent
 
 
@@ -110,10 +110,13 @@ class Overlay:
     def ui_loop(self):
         """Primary UI loop: sets up GLFW window, then waits for input and draw events"""
         with self._glfw_window() as window:
-            if not enable_click_through(self._title):
-                self._logger.warning(
-                    f"Failed to enable click through for window {self._title}"
-                )
+            if platform.system() == "Windows":
+                from saru.windows import enable_click_through
+
+                if not enable_click_through(self._title):
+                    self._logger.warning(
+                        f"Failed to enable click through for window {self._title}"
+                    )
 
             GL.glClear(GL.GL_COLOR_BUFFER_BIT)
             with self._skia_surface(window) as surface:

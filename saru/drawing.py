@@ -1,4 +1,5 @@
 import logging
+import platform
 
 import glfw
 import skia
@@ -96,7 +97,10 @@ def draw_subtitles(
         if is_ascii(line):
             typeface = skia.Typeface("arial")
         else:
-            typeface = skia.Typeface("meiryo")
+            if platform.system() == "Windows":
+                typeface = skia.Typeface("meiryo")
+            else:
+                typeface = skia.Typeface("Noto Sans CJK JP")  # TODO: magic string
         font = skia.Font(typeface, subtitle_size)
         w = font.measureText(line)
         height = font.getSpacing()
