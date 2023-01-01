@@ -18,9 +18,9 @@ class Recognizer:
     def __init__(self):
         self._client = vision.ImageAnnotatorClient()
 
-    def recognize(self, path) -> RawData:
+    def recognize(self, path, xdelta=0, ydelta=0) -> RawData:
         response = self._detect_text(path)
-        return self._collect_symbols(response)
+        return self._collect_symbols(response, xdelta, ydelta)
 
     def _detect_text(self, path):
         with io.open(path, "rb") as image_file:
@@ -42,16 +42,16 @@ class Recognizer:
                 "Google Cloud Vision client threw exception: " + e.message
             ) from e
 
-    def _vertices_to_box(self, vertices):
+    def _vertices_to_box(self, vertices, xdelta, ydelta):
         upper_left = vertices[0]
         lower_right = vertices[2]
-        x = upper_left.x
-        y = upper_left.y
-        w = lower_right.x - x
-        h = lower_right.y - y
+        x = upper_left.x + xdelta
+        y = upper_left.y + ydelta
+        w = lower_right.x + xdelta - x
+        h = lower_right.y + ydelta - y
         return Box(x, y, w, h)
 
-    def _collect_symbols(self, response):
+    def _collect_symbols(self, response, xdelta, ydelta):
         annotation = response.full_text_annotation
 
         def has_line_break(symbol):
@@ -70,7 +70,7 @@ class Recognizer:
                 for paragraph in block.paragraphs:
                     for word in paragraph.words:
                         for symbol in word.symbols:
-                            cdata = self._convert(symbol, line_number)
+                            cdata = self._convert(symbol, line_number, xdelta, ydelta)
                             line.append(cdata)
                             if has_line_break(symbol):
                                 line_number += 1
@@ -78,14 +78,14 @@ class Recognizer:
                                 all_lines.append(line)
                                 line = []
                 vertices = block.bounding_box.vertices
-                box = self._vertices_to_box(vertices)
+                box = self._vertices_to_box(vertices, xdelta, ydelta)
                 blocks.append(BlockData(lines, box))
 
         return RawData(all_lines, blocks)
 
-    def _convert(self, symbol, line_number):
+    def _convert(self, symbol, line_number, xdelta, ydelta):
         vertices = symbol.bounding_box.vertices
-        box = self._vertices_to_box(vertices)
+        box = self._vertices_to_box(vertices, xdelta, ydelta)
         text = symbol.text
         conf = 100.0  # symbol.confidence # TODO ?
         return CharacterData(text, line_number, conf, box)

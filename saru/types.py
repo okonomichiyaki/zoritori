@@ -206,6 +206,7 @@ class RawData:
             return
         screen_height = 1080  # TODO: magic number
         screen_width = 1920  # TODO: magic number
+        _logger.debug("%s", self.blocks)
         blocks = filter(lambda block: block.y > screen_height / 2, self.blocks)
         # largest_by_pixels = max(self.blocks, key=lambda block: block.width * block.height)
         # largest_by_chars = max(self.blocks, key=lambda block: block.char_count())

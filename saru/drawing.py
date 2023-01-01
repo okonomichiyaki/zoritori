@@ -24,7 +24,7 @@ def draw(c, render_state):
     secondary_data = render_state.secondary_data
 
     if render_state.parts_of_speech:
-        draw_parts_of_speech(c, clip, sdata)
+        draw_parts_of_speech(c, sdata)
 
     if render_state.debug:
         c.drawRect(clip, STROKE_BLUE)
@@ -32,13 +32,13 @@ def draw(c, render_state):
             c.drawRect(secondary_clip, STROKE_BLUE)
 
     if sdata.cdata:
-        draw_low_confidence(c, clip, sdata.cdata, 50)
+        draw_low_confidence(c, sdata.cdata, 50)
 
     if render_state.debug and sdata.raw_data.blocks:
-        draw_block_boxes(c, render_state.fullscreen, clip, sdata.raw_data.blocks)
+        draw_block_boxes(c, sdata.raw_data.blocks)
 
     if sdata.furigana:
-        draw_furigana(c, render_state.furigana_size, clip, sdata.furigana)
+        draw_furigana(c, render_state.furigana_size, sdata.furigana)
 
     if sdata.translation:
         draw_subtitles(
@@ -121,11 +121,11 @@ def draw_subtitles(
         previous_height = height
 
 
-def draw_furigana(c, size, clip, fs):
+def draw_furigana(c, size, fs):
     for f in fs:
         text = f.reading
-        x = clip.x() + f.x
-        y = clip.y() + f.y
+        x = f.x
+        y = f.y
         typeface = skia.Typeface("meiryo", skia.FontStyle.Bold())
         # "ms gothic"
         font = skia.Font(typeface, size)
@@ -136,11 +136,7 @@ def draw_furigana(c, size, clip, fs):
         c.drawString(text, x, y - buffer, font, FILL_BLACK)
 
 
-def shift(a, b):
-    return skia.Rect.MakeXYWH(a.x() + b.x(), a.y() + b.y(), a.width(), a.height())
-
-
-def draw_parts_of_speech(c, clip, sdata):
+def draw_parts_of_speech(c, sdata):
     part_of_speech_border_width = 3.0  # TODO: magic number
     paint = skia.Paint(
         Style=skia.Paint.kStroke_Style, StrokeWidth=part_of_speech_border_width
@@ -152,8 +148,7 @@ def draw_parts_of_speech(c, clip, sdata):
             paint.setColor(skia.ColorSetARGB(0xFF, 0xFF, 0x7F, 0x00))
         else:
             continue
-        rect = shift(t.box(), clip)
-        c.drawRect(rect, paint)
+        c.drawRect(t.box(), paint)
 
 
 # TODO: rename this
@@ -161,30 +156,28 @@ def cdata_to_rect(cdata):
     return skia.Rect.MakeXYWH(cdata.left, cdata.top, cdata.width, cdata.height)
 
 
-def draw_character_boxes(c, clip, lines):
+def draw_character_boxes(c, lines):
     for line in lines:
         for cdata in line:
-            rect = shift(cdata_to_rect(cdata), clip)
+            rect = cdata_to_rect(cdata)
             c.drawRect(rect, STROKE_GREEN)
 
 
-def draw_block_boxes(c, fullscreen, clip, blocks):
+def draw_block_boxes(c, blocks):
     for block in blocks:
         rect = cdata_to_rect(block)
-        if not fullscreen:
-            rect = shift(rect, clip)
         c.drawRect(rect, STROKE_GREEN)
 
 
-def draw_low_confidence(c, clip, lines, threshold=50):
+def draw_low_confidence(c, lines, threshold=50):
     boxes = []
     for line in lines:
         for cdata in line:
             if cdata.conf < threshold:
                 boxes.append(cdata)
     for box in boxes:
-        x = clip.x() + box.left + box.width / 2
-        y = clip.y() + box.top + box.height / 2
+        x = box.left + box.width / 2
+        y = box.top + box.height / 2
         radius = box.width / 2
         c.drawCircle(x, y, radius, STROKE_RED)
 

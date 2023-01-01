@@ -147,7 +147,11 @@ class Watcher(threading.Thread):
             (full_path, text_path) = take_screenshots(
                 self._options.NotesFolder, self._saved_clip
             )
-            sdata = process_image(self._options, self._recognizer, full_path, text_path)
+            x = self._saved_clip.x()
+            y = self._saved_clip.y()
+            sdata = process_image(
+                self._options, self._recognizer, full_path, text_path, x, y
+            )
             if sdata:
                 self._last_sdata = sdata
                 self._update_watch()
@@ -219,6 +223,7 @@ class Watcher(threading.Thread):
 
         blocks = sdata.raw_data.blocks
         if len(blocks) < 1:
+            self._logger.debug("raw data has no blocks")
             return []
 
         # find largest block
@@ -240,10 +245,8 @@ class Watcher(threading.Thread):
 
         regions = []
         for watch in watches:
-            x0 = (self._saved_clip and self._saved_clip.x()) or 0
-            y0 = (self._saved_clip and self._saved_clip.y()) or 0
-            x = x0 + watch.left + self._WATCH_MARGIN
-            y = y0 + watch.top + self._WATCH_MARGIN
+            x = watch.left + self._WATCH_MARGIN
+            y = watch.top + self._WATCH_MARGIN
             w = watch.width - self._WATCH_MARGIN * 2
             if w <= 0:
                 w = watch.width
@@ -255,6 +258,8 @@ class Watcher(threading.Thread):
                 region = (x, y, w, h)
                 regions.append(region)
                 self._logger.debug("watch char: %s, region: %s", watch.text, region)
+            else:
+                self._logger.debug("failed to find watches > 0")
 
         return regions
 
