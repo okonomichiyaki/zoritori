@@ -18,11 +18,18 @@ class Overlay:
         self._draw_queue = Queue()
         self._start_pos = None
         self._stop = False
+        self._window = None
 
     def get_screen_size(self):
         monitor = glfw.get_primary_monitor()
         video_mode = glfw.get_video_mode(monitor)
         return (video_mode.size.width, video_mode.size.height)
+
+    def get_window_pos(self):
+        if self._window:
+            return glfw.get_window_pos(self._window)
+        else:
+            return None
 
     @contextlib.contextmanager
     def _glfw_window(self):
@@ -36,8 +43,11 @@ class Overlay:
         glfw.window_hint(glfw.FLOATING, 1)
 
         (width, height) = self.get_screen_size()
+        monitor = None  # glfw.get_primary_monitor()
         # https://stackoverflow.com/questions/72588667/
-        window = glfw.create_window(width - 1, height - 1, self._title, None, None)
+        self._window = glfw.create_window(
+            width - 1, height - 1, self._title, monitor, None
+        )
 
         def key_callback(window, key, scancode, action, mods):
             # self._logger.debug(
@@ -56,9 +66,9 @@ class Overlay:
             elif action == glfw.PRESS and (glfw.KEY_R == key or glfw.KEY_Q == key):
                 self._start_pos = glfw.get_cursor_pos(window)
 
-        glfw.set_key_callback(window, key_callback)
-        glfw.make_context_current(window)
-        yield window
+        glfw.set_key_callback(self._window, key_callback)
+        glfw.make_context_current(self._window)
+        yield self._window
         glfw.terminate()
 
     @contextlib.contextmanager

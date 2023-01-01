@@ -144,8 +144,9 @@ class Watcher(threading.Thread):
             self._secondary_clip = None
 
         if self._saved_clip:  # TODO: could check if this has changed
+            pos = self._overlay.get_window_pos()
             (full_path, text_path) = take_screenshots(
-                self._options.NotesFolder, self._saved_clip
+                self._options.NotesFolder, self._saved_clip, pos
             )
             x = self._saved_clip.x()
             y = self._saved_clip.y()

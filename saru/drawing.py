@@ -28,6 +28,7 @@ def draw(c, render_state):
         draw_parts_of_speech(c, sdata)
 
     if render_state.debug:
+        draw_laser_point(c, 0, 0)
         c.drawRect(clip, STROKE_BLUE)
         if secondary_clip:
             c.drawRect(secondary_clip, STROKE_BLUE)
