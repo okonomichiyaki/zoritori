@@ -1,5 +1,5 @@
 import logging
-from jamdict import Jamdict
+# from jamdict import Jamdict
 
 
 _logger = logging.getLogger("saru")
