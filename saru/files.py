@@ -19,7 +19,7 @@ def save_json(path, data):
         json.dump(data, f)
 
 
-def get_path(notes_folder, base, extension, title=None, dated=False, timed=False):
+def get_path(folder, base, extension, title=None, dated=False, timed=False):
     filename = base
     if dated:
         date = datetime.now().strftime("%Y-%m-%d")
@@ -31,6 +31,6 @@ def get_path(notes_folder, base, extension, title=None, dated=False, timed=False
     if title:
         filename = filename + "-" + title
     filename = filename + "." + extension
-    path = os.path.join(notes_folder, filename)
+    path = os.path.join(folder, filename)
     path = os.path.expanduser(path)
     return os.path.normpath(path)

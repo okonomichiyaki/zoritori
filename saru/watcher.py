@@ -47,7 +47,7 @@ class RenderState:
 
 
 class Watcher(threading.Thread):
-    def __init__(self, options, recognizer, event_queue, overlay):
+    def __init__(self, options, recognizer, event_queue, overlay, watch_dir):
         threading.Thread.__init__(self)
         self._stop_flag = threading.Event()
         self._WATCH_MARGIN = 5  # TODO: magic number
@@ -59,12 +59,16 @@ class Watcher(threading.Thread):
         self._overlay = overlay
 
         self._watch_paths = None
+        self._watch_dir = watch_dir
         self._watch_regions = None
         self._last_sdata = None
         self._last_hover = None
         self._saved_clip = None
         self._secondary_clip = None
-        self._clips_path = Path.home() / ".saru" / "clips.json"
+        dot_saru = Path.home() / ".saru"
+        Path(dot_saru).mkdir(parents=True, exist_ok=True)
+        self._clips_path = dot_saru / "clips.json"
+        Path(self._options.NotesFolder).mkdir(parents=True, exist_ok=True)
 
     def stop(self):
         self._stop_flag.set()
@@ -133,9 +137,7 @@ class Watcher(threading.Thread):
             None,
         )
         if self._secondary_clip:
-            path = take_screenshot_clip_only(
-                self._options.NotesFolder, self._secondary_clip
-            )
+            path = take_screenshot_clip_only(self._watch_dir, self._secondary_clip)
             sdata = process_image_light(path, self._options, self._recognizer)
             if sdata and len(sdata.original) > 0:
                 self._logger.debug("secondary clip: %s", sdata.original)
@@ -144,11 +146,13 @@ class Watcher(threading.Thread):
             self._secondary_clip = None
 
         if self._saved_clip:  # TODO: could check if this has changed
-            (full_path, text_path) = take_screenshots(
-                self._options.NotesFolder, self._saved_clip
-            )
+            (full_path, text_path) = take_screenshots(self._watch_dir, self._saved_clip)
             sdata = process_image(
-                self._options, self._recognizer, full_path, text_path, self._saved_clip
+                self._options,
+                self._recognizer,
+                full_path,
+                text_path,
+                self._saved_clip,
             )
             if sdata:
                 self._last_sdata = sdata
@@ -158,7 +162,12 @@ class Watcher(threading.Thread):
                 self._overlay.draw(lambda c: draw(c, render_state))
         elif self._options.fullscreen:
             full_path = take_fullscreen_screenshot(self._options.NotesFolder)
-            sdata = process_image(self._options, self._recognizer, full_path, None)
+            sdata = process_image(
+                self._options,
+                self._recognizer,
+                full_path,
+                None,
+            )
             if sdata:
                 self._last_sdata = sdata
                 self._update_watch()
@@ -274,15 +283,11 @@ class Watcher(threading.Thread):
             w = self._saved_clip.width
             h = self._saved_clip.height
             self._watch_regions = [(x, y, w, h)]
-        self._watch_paths = take_watch_screenshot(
-            self._options.NotesFolder, self._watch_regions
-        )
+        self._watch_paths = take_watch_screenshot(self._watch_dir, self._watch_regions)
 
     def _has_screen_changed(self):
         if self._options.no_watch:
             return False
         if not self._watch_regions or not self._watch_paths:
             return False
-        return screen_changed(
-            self._options.NotesFolder, self._watch_paths, self._watch_regions
-        )
+        return screen_changed(self._watch_dir, self._watch_paths, self._watch_regions)

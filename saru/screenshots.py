@@ -9,7 +9,7 @@ from saru.types import CharacterData, Box
 _logger = logging.getLogger("saru")
 
 
-def take_watch_screenshot(folder: str, regions):
+def take_watch_screenshot(folder, regions):
     watch_paths = []
     for i, region in enumerate(regions):
         watch_path = get_path(folder, "screenshot", "png", title=f"watch_{i}_base")

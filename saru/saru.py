@@ -1,6 +1,7 @@
 import logging
 import sys
 import os
+from pathlib import Path
 from operator import itemgetter
 from statistics import median
 from dataclasses import dataclass
@@ -116,20 +117,17 @@ def process_image(options, recognizer, full_path, text_path, context):
         options, recognizer, text_path or full_path, context
     )
     if saru is None:
-        if text_path:
-            os.remove(text_path)
-        os.remove(full_path)
         return None
+    notes_dir = options.NotesFolder
     text = saru.original
-    if text_path:
-        os.remove(text_path)
     cleaned_up = text
     for c in ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "\n"]:
         cleaned_up = cleaned_up.replace(c, "-")
-    new_path = full_path.replace("xxxxx", cleaned_up)
-    os.rename(full_path, new_path)
-    if not save_vocabulary(options.NotesFolder, saru.tokens, new_path):
-        os.remove(new_path)
+    new_filename = (Path(full_path).name).replace("xxxxx", cleaned_up)
+    notes_path = Path(notes_dir) / new_filename
+    os.rename(full_path, notes_path)
+    if not save_vocabulary(options.NotesFolder, saru.tokens, notes_path):
+        os.remove(notes_path)
     if options.debug:
         log_debug(saru)
     return saru
