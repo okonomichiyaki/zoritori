@@ -188,7 +188,7 @@ class Watcher(threading.Thread):
     def run(self):
         """Primary watch loop, periodically takes screenshots and reprocesses text"""
 
-        #        self._saved_clip = load_clips(self._clips_path)
+        self._saved_clip = load_clips(self._clips_path)
 
         while not self._stop_flag.is_set():
             try:
@@ -209,7 +209,7 @@ class Watcher(threading.Thread):
                     self._overlay.stop()
             self._update_hover()
 
-    #        save_clips(self._saved_clip, self._clips_path)
+        save_clips(self._saved_clip, self._clips_path)
 
     def _get_first_non_punct(self, sdata):
         first_line = sdata.cdata[0]

@@ -2,6 +2,7 @@ import skia
 import pyautogui
 
 from saru.files import load_json, save_json
+from saru.types import Box, Root
 
 
 def is_mouse_inside(clip, rect):
@@ -24,7 +25,10 @@ def load_clips(path):
     clips = load_json(path)
     if clips and len(clips) > 0:
         clip = clips[0]
-        return skia.Rect.MakeXYWH(clip["x"], clip["y"], clip["w"], clip["h"])
+        context = Root(
+            clip["screenx"], clip["screeny"], clip["clientx"], clip["clienty"]
+        )
+        return Box(clip["x"], clip["y"], clip["w"], clip["h"], context)
     return None
 
 
@@ -34,6 +38,10 @@ def save_clips(clip, path):
     clip = {
         "x": clip.x,
         "y": clip.y,
+        "screenx": clip.screenx - clip.x,
+        "screeny": clip.screeny - clip.y,
+        "clientx": clip.clientx - clip.x,
+        "clienty": clip.clienty - clip.y,
         "w": clip.width,
         "h": clip.height,
     }
