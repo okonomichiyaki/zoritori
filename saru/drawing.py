@@ -1,10 +1,10 @@
 import logging
-import platform
 
 import glfw
 import skia
 
 from saru.strings import is_ascii
+from saru.platform import get_ja_font
 
 
 FILL_BLACK = skia.Paint(Style=skia.Paint.kFill_Style, Color=skia.ColorBLACK)
@@ -101,10 +101,7 @@ def draw_subtitles(
         if is_ascii(line):
             typeface = skia.Typeface("arial")
         else:
-            if platform.system() == "Windows":
-                typeface = skia.Typeface("meiryo")
-            else:
-                typeface = skia.Typeface("Noto Sans CJK JP")  # TODO: magic string
+            typeface = skia.Typeface(get_ja_font())
         font = skia.Font(typeface, subtitle_size)
         w = font.measureText(line)
         height = font.getSpacing()
@@ -134,13 +131,7 @@ def draw_furigana(c, size, fs):
         text = f.reading
         x = f.x
         y = f.y
-        if platform.system() == "Windows":
-            typeface = skia.Typeface("meiryo")
-        else:
-            typeface = skia.Typeface(
-                "Noto Sans CJK JP", skia.FontStyle.Bold()
-            )  # TODO: magic string
-        # "ms gothic"
+        typeface = skia.Typeface(get_ja_font())
         font = skia.Font(typeface, size)
         width = font.measureText(text)
         x = x - width / 2
