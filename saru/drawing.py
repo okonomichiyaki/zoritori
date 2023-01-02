@@ -89,6 +89,7 @@ def draw_subtitles(
         y0 = screen_height
     if debug:
         draw_laser_point(c, x0, y0)
+    _logger.debug("x0,y0=%s,%s", x0, y0)
     lines = text.split("\n")
     lines = map(lambda line: line.strip(), lines)
     lines = filter(lambda line: len(line) > 0, lines)
@@ -124,6 +125,8 @@ def draw_subtitles(
             FILL_WHITE,
         )
         previous_height = height
+    if debug:
+        draw_laser_point(c, x0, y0)
 
 
 def draw_furigana(c, size, fs):
