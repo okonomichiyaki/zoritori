@@ -32,6 +32,26 @@ class Overlay:
         else:
             return None
 
+    def _create_window(self):
+        (width, height) = self.get_screen_size()
+        monitor = None  # glfw.get_primary_monitor()
+        # https://stackoverflow.com/questions/72588667/
+        width = width - 1
+        height = height - 1
+        window = glfw.create_window(
+            width, height, self._title, monitor, None
+        )
+        (actualw, actualh) = glfw.get_window_size(window)
+        (x0, y0) = glfw.get_window_pos(window)
+        if x0 > 0 or y0 > 0:
+            new_w = actualw - x0
+            new_h = actualh - y0
+            glfw.set_window_size(window, new_w, new_h)
+            self._logger.debug("created window, adjusted to x0,y0=%d,%d w,h=%d,%d", x0, y0, new_w, new_h)
+        else:
+            self._logger.debug("created window, x0,y0=%d,%d w,h=%d,%d", x0, y0, actualw, actualh)
+        return window
+
     @contextlib.contextmanager
     def _glfw_window(self):
         if not glfw.init():
@@ -43,12 +63,7 @@ class Overlay:
         glfw.window_hint(glfw.TRANSPARENT_FRAMEBUFFER, 1)
         glfw.window_hint(glfw.FLOATING, 1)
 
-        (width, height) = self.get_screen_size()
-        monitor = None  # glfw.get_primary_monitor()
-        # https://stackoverflow.com/questions/72588667/
-        self._window = glfw.create_window(
-            width - 1, height - 1, self._title, monitor, None
-        )
+        self._window = self._create_window()
 
         def key_callback(window, key, scancode, action, mods):
             # self._logger.debug(
