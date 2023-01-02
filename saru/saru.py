@@ -7,14 +7,14 @@ from dataclasses import dataclass
 
 from saru.translator import translate
 from saru.tokenizer import tokenize
-from saru.types import Furigana, SaruData
+from saru.types import Furigana, SaruData, Box
 from saru.vocabulary import save_vocabulary
 
 
 _logger = logging.getLogger("saru")
 
 
-def _get_furigana(tokens, cdata, level):
+def _get_furigana(tokens, cdata, level, context):
     if level == "none":
         return []
 
@@ -29,7 +29,10 @@ def _get_furigana(tokens, cdata, level):
         right = last.left + last.width
         x = left + (right - left) / 2
         y = first.top
-        return Furigana(reading, x, y)
+        box = Box(
+            x, y, None, None, context
+        )  # TODO: consider adding a Point class instead
+        return Furigana(reading, box)
 
     def filter(m):
         if level == "all":
@@ -81,7 +84,7 @@ def _recognize_tokenize_translate(options, recognizer, filename, context):
 
     _logger.debug("tokenizing...")
     tokens = tokenize(text, ldata)
-    furigana = _get_furigana(tokens, ldata, furigana_level)
+    furigana = _get_furigana(tokens, ldata, furigana_level, context)
 
     translation = None
     if should_translate:

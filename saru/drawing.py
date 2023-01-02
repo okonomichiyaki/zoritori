@@ -134,7 +134,10 @@ def draw_furigana(c, size, fs):
         text = f.reading
         x = f.x
         y = f.y
-        typeface = skia.Typeface("meiryo", skia.FontStyle.Bold())
+        if platform.system() == "Windows":
+            typeface = skia.Typeface("meiryo")
+        else:
+            typeface = skia.Typeface("Noto Sans CJK JP")  # TODO: magic string
         # "ms gothic"
         font = skia.Font(typeface, size)
         width = font.measureText(text)

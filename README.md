@@ -16,7 +16,7 @@ Note: This is very much a work in progress and is rough around the edges.
 
 ## requirements
 
-* Windows (tested on Windows 10)
+* Windows or Linux (tested on Windows 10 and Ubuntu 22.04)
 * Python (tested with 3.10)
 * [Poetry](https://python-poetry.org/)
 * either [Tesseract](https://tesseract-ocr.github.io/)...

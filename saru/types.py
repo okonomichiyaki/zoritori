@@ -11,13 +11,6 @@ _logger = logging.getLogger("saru")
 
 
 @dataclass
-class Furigana:
-    reading: str
-    x: int  # TODO why does this class has its own coords
-    y: int
-
-
-@dataclass
 class Root:
     """Origin parent context for boxes"""
 
@@ -91,6 +84,20 @@ class Box:
     @property
     def height(self):
         return self._height
+
+
+@dataclass
+class Furigana:
+    reading: str
+    box: Box
+
+    @property
+    def x(self):
+        return self.box.clientx
+
+    @property
+    def y(self):
+        return self.box.clienty
 
 
 @dataclass
