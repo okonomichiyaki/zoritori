@@ -181,14 +181,12 @@ class Watcher(threading.Thread):
     def _update_hover(self):
         """Check if the mouse cursor is hovering over a token, and if so save the token"""
         if self._saved_clip and self._last_sdata:
-            hover = find_hover(self._saved_clip, self._last_sdata.tokens)
+            hover = find_hover(self._last_sdata.tokens)
             if hover != self._last_hover:
                 self._last_hover = hover
                 self._logger.info(
                     f"hovered token: {hover.surface() if hover else None}"
                 )
-                if hover:
-                    dictionary.debug(hover.surface())
 
     def _any_clip(self):
         return self._saved_clip or self._secondary_clip or self._options.fullscreen

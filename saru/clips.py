@@ -2,21 +2,19 @@ import skia
 import pyautogui
 
 from saru.files import load_json, save_json
-from saru.types import Box, Root
+from saru.types import Box, Root, Token
 
 
-def is_mouse_inside(clip, rect):
-    shifted = skia.Rect.MakeXYWH(
-        clip.x + rect.x(), clip.y + rect.y(), rect.width(), rect.height()
-    )
+def is_mouse_inside(box: Box):
+    rect = skia.Rect.MakeXYWH(box.screenx, box.screeny, box.width, box.height)
     pos = pyautogui.position()
     pixel = skia.Rect.MakeXYWH(pos.x, pos.y, 1, 1)
-    return shifted.intersect(pixel)
+    return rect.intersect(pixel)
 
 
-def find_hover(clip, tokens):
+def find_hover(tokens: list[Token]):
     for t in tokens:
-        if is_mouse_inside(clip, t.box()):
+        if is_mouse_inside(t.box()):
             return t
     return None
 

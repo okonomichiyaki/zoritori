@@ -34,6 +34,10 @@ class Box:
         return skia.Rect.MakeXYWH(self.clientx, self.clienty, self.width, self.height)
 
     @property
+    def context(self):
+        return self._parent_context
+
+    @property
     def screenx(self):
         if self._parent_context:
             return self._parent_context.screenx + self._left
@@ -174,11 +178,12 @@ class Token:
         ]
 
     def box(self):
+        context = self._cdata[0].context
         left = self._cdata[0].left
         top = self._cdata[0].top
         height = self._cdata[0].height
         width = self._cdata[-1].left + self._cdata[-1].width - left
-        return skia.Rect.MakeXYWH(left, top, width, height)  # ??? coordinates
+        return Box(left, top, width, height, context)
 
     def line_num(self):
         return self._line_num
