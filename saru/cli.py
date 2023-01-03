@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sys
+from pathlib import Path
 
 import saru.saru
 import saru.ui as ui
@@ -44,4 +45,6 @@ def main():
             sys.stdout.reconfigure(encoding="utf-8", newline="\n")
             print(json.dumps(data))
     else:
+        if options.NotesFolder and len(options.NotesFolder) > 0:
+            Path(options.NotesFolder).mkdir(parents=True, exist_ok=True)
         ui.main_loop(options, recognizer)

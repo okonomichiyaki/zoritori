@@ -68,7 +68,6 @@ class Watcher(threading.Thread):
         dot_saru = Path.home() / ".saru"
         Path(dot_saru).mkdir(parents=True, exist_ok=True)
         self._clips_path = dot_saru / "clips.json"
-        Path(self._options.NotesFolder).mkdir(parents=True, exist_ok=True)
 
     def stop(self):
         self._stop_flag.set()

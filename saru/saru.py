@@ -119,15 +119,16 @@ def process_image(options, recognizer, full_path, text_path, context):
     if saru is None:
         return None
     notes_dir = options.NotesFolder
-    text = saru.original
-    cleaned_up = text
-    for c in ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "\n"]:
-        cleaned_up = cleaned_up.replace(c, "-")
-    new_filename = (Path(full_path).name).replace("xxxxx", cleaned_up)
-    notes_path = Path(notes_dir) / new_filename
-    os.rename(full_path, notes_path)
-    if not save_vocabulary(options.NotesFolder, saru.tokens, notes_path):
-        os.remove(notes_path)
+    if options.NotesFolder and len(options.NotesFolder) > 0:
+        text = saru.original
+        cleaned_up = text
+        for c in ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "\n"]:
+            cleaned_up = cleaned_up.replace(c, "-")
+            new_filename = (Path(full_path).name).replace("xxxxx", cleaned_up)
+        notes_path = Path(notes_dir) / new_filename
+        os.rename(full_path, notes_path)
+        if not save_vocabulary(options.NotesFolder, saru.tokens, notes_path):
+            os.remove(notes_path)
     if options.debug:
         log_debug(saru)
     return saru
