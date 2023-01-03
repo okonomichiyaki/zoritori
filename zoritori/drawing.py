@@ -73,6 +73,19 @@ def draw(c, render_state):
             debug=render_state.debug,
         )
 
+    if render_state.hover:
+        draw_subtitles(
+            c,
+            render_state.subtitle_size,
+            render_state.subtitle_margin,
+            " | ".join(render_state.hover_lookup),
+            x0=render_state.primary_clip.x + render_state.primary_clip.width / 2,
+            y0=render_state.primary_clip.y,
+            direction=-1,
+            debug=render_state.debug,
+        )
+
+
 
 def draw_subtitles(
     c, subtitle_size, subtitle_margin, text, x0=-1, y0=-1, direction=-1, debug=False

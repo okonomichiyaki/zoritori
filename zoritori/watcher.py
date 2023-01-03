@@ -46,6 +46,7 @@ class RenderState:
     secondary_data: list[str]
     secondary_clip: Box
     hover: Token
+    hover_lookup: list[str]
 
 
 class Watcher(threading.Thread):
@@ -65,6 +66,7 @@ class Watcher(threading.Thread):
         self._watch_regions = None
         self._last_sdata = None
         self._last_hover = None
+        self._last_hover_lookup = None
         self._saved_clip = None
         self._secondary_clip = None
         dot_zoritori = Path.home() / ".zoritori"
@@ -150,6 +152,7 @@ class Watcher(threading.Thread):
             None,
             None,
             None,
+            None,
         )
         if self._secondary_clip:
             path = take_screenshot_clip_only(self._watch_dir, self._secondary_clip)
@@ -202,6 +205,7 @@ class Watcher(threading.Thread):
                 self._last_hover = hover
                 entry = dictionary.lookup(hover.surface()) if hover else None
                 self._logger.info(f"hovered token: %s", entry)
+                self._last_hover_lookup = entry
                 return True
         return False
 
@@ -233,6 +237,7 @@ class Watcher(threading.Thread):
                     self._overlay.stop()
             elif self._update_hover() and self._render_state:
                 self._render_state.hover = self._last_hover
+                self._render_state.hover_lookup = self._last_hover_lookup
                 self._overlay.draw(lambda c: draw(c, self._render_state))
 
         save_clips(self._saved_clip, self._clips_path)
