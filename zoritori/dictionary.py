@@ -1,6 +1,5 @@
 import logging
 
-from jamdict import Jamdict
 
 
 _logger = logging.getLogger("zoritori")
@@ -18,10 +17,4 @@ def _entry_to_list(entry):
 
 
 def lookup(s):
-    jam = Jamdict()
-    result = jam.lookup(s)
-    if result and len(result.entries) > 0:
-        entry = result.entries[0]
-        return _entry_to_list(entry)
-    else:
-        return None
+    return None
