@@ -25,6 +25,7 @@ def take_screenshots(folder: str, clip: Box):
     )
     pyautogui.screenshot(full_path)
     clip_path = get_path(folder, "screenshot", "png", title="text")
+    Path(clip_path).unlink(missing_ok=True)
     pyautogui.screenshot(
         clip_path, region=(clip.screenx, clip.screeny, clip.width, clip.height)
     )
