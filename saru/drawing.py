@@ -129,7 +129,7 @@ def draw_furigana(c, f, size):
     text = f.reading
     x = f.x
     y = f.y
-    typeface = skia.Typeface(get_ja_font())
+    typeface = skia.Typeface(get_ja_font(), skia.FontStyle.Bold())
     font = skia.Font(typeface, size)
     width = font.measureText(text)
     x = x - width / 2
