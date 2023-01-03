@@ -86,16 +86,16 @@ def process_image(options, recognizer, full_path, text_path, context):
     if zoritori is None:
         return None
     notes_dir = options.NotesFolder
-    if options.NotesFolder and len(options.NotesFolder) > 0:
+    if notes_dir:
         text = zoritori.original
         cleaned_up = text
         for c in ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "\n"]:
             cleaned_up = cleaned_up.replace(c, "-")
             new_filename = (Path(full_path).name).replace("xxxxx", cleaned_up)
-        notes_path = Path(notes_dir) / new_filename
-        os.rename(full_path, notes_path)
-        if not save_vocabulary(options.NotesFolder, zoritori.tokens, notes_path):
-            os.remove(notes_path)
+        notes_pic = Path(notes_dir) / new_filename
+        os.rename(full_path, notes_pic)
+        if not save_vocabulary(notes_dir, zoritori.tokens, notes_pic):
+            os.remove(notes_pic)
     if options.debug:
         log_debug(zoritori)
     return zoritori

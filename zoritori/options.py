@@ -47,7 +47,9 @@ def get_options():
     )
     parser.add("--DeepLUrl", action="store", help=("DeepL API translate URL"))
     parser.add("--DeepLKey", action="store", help=("DeepL API key"))
-    parser.add("--NotesFolder", action="store", help=("Path to notes folder"))
+    parser.add("--NotesFolder", action="store", help=("Path to notes folder. If present, all notes and screenshots will be saved here."))
+    parser.add("--NotesRoot", action="store", help=("Path to notes parent folder. If present, and NotesFolder is absent, will save notes and screenshots for each session as a new folder"))
+    parser.add("--NotesPrefix", action="store", help=("Prefix for session folders"))
     parser.add(
         "-c", "--config", required=True, is_config_file=True, help="Path to config file"
     )

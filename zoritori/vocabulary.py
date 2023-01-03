@@ -28,7 +28,7 @@ def _is_vocab(token):
 
 
 def save_vocabulary(folder, tokens, img_path=None):
-    path = get_path(folder, "vocabulary", "md", dated=True)
+    path = get_path(folder, "vocabulary", "md", dated=False)
     words = [t.dictionary_form() for t in tokens if _is_vocab(t)]
     words = _filter_seen_vocab(folder, words)
     if len(words) == 0:

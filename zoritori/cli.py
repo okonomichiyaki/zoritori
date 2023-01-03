@@ -7,6 +7,7 @@ from pathlib import Path
 import zoritori.pipeline
 import zoritori.ui as ui
 from zoritori.options import get_options
+from zoritori.files import start_new_session
 
 
 def configure_logging(log_level):
@@ -26,6 +27,14 @@ def main():
     options = get_options()
 
     configure_logging(options.log_level)
+
+    if not options.NotesFolder and options.NotesRoot:
+        prefix = options.NotesPrefix or "session"
+        options.NotesFolder = start_new_session(options.NotesRoot, prefix)
+    elif options.NotesFolder:
+        path = Path(options.NotesFolder)
+        path.mkdir(parents=True, exist_ok=True)
+        options.NotesFolder = path
 
     if options.engine == "google":
         if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
@@ -47,6 +56,4 @@ def main():
             sys.stdout.reconfigure(encoding="utf-8", newline="\n")
             print(json.dumps(data))
     else:
-        if options.NotesFolder and len(options.NotesFolder) > 0:
-            Path(options.NotesFolder).mkdir(parents=True, exist_ok=True)
         ui.main_loop(options, recognizer)
