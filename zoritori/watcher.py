@@ -78,20 +78,23 @@ class Watcher(threading.Thread):
     def _handle_event(self, event):
         """Handles input events from the overlay"""
         if not event:
-            return
+            return False
         clip = event.get_clip()
         key = event.get_key()
         if clip and key == glfw.KEY_R:
             self._logger.info(f"watcher got primary clip event: {clip}")
             self._saved_clip = clip
+            return True
         if clip and key == glfw.KEY_Q:
             self._logger.info(f"watcher got secondary clip event: {clip}")
             self._secondary_clip = clip
+            return True
         elif key:
             self._logger.info(f"watcher got key event: {key}")
-            self._handle_key(key)
+            return self._handle_key(key)
         else:
             self._logger.info(f"watcher got unknown event: {event}")
+            return False
 
     def _open_search(self, url):
         if self._last_hover:
@@ -105,22 +108,30 @@ class Watcher(threading.Thread):
         match key:
             case glfw.KEY_C:
                 self._overlay.clear()
+                return True
             case glfw.KEY_D:
                 self._options.debug = not self._options.debug
+                return True
             case glfw.KEY_T:
                 self._options.translate = not self._options.translate
+                return True
             case glfw.KEY_J:
                 self._open_search("http://jisho.org/search/")
+                return False
             case glfw.KEY_W:
                 self._open_search("https://ja.wikipedia.org/wiki/")
+                return False
             case glfw.KEY_E:
                 self._open_search("https://en.wikipedia.org/w/index.php?search=")
+                return False
             case glfw.KEY_MINUS:
                 self._options.FuriganaSize = self._options.FuriganaSize - 1
+                return True
             case glfw.KEY_EQUAL:
                 self._options.FuriganaSize = self._options.FuriganaSize + 1
+                return True
             case _:
-                pass
+                return False
 
     def _process(self):
         """Take a fresh screenshot and process it. if relevant, trigger drawing and update watch"""
@@ -207,9 +218,9 @@ class Watcher(threading.Thread):
                 event = self._event_queue.get(timeout=0.5)
             except queue.Empty:
                 event = None
-            self._handle_event(event)
+            dirty = self._handle_event(event)
             changed = self._has_screen_changed()
-            if self._any_clip() and (not self._watch_paths or changed or event):
+            if self._any_clip() and (not self._watch_paths or changed or dirty):
                 self._overlay.clear(block=True)
                 try:
                     self._process()
