@@ -15,11 +15,14 @@ pytesseract = "^0.3.9"
 skia-python = "^87.4"
 SudachiPy = "^0.6.5"
 SudachiDict-core = "^20220519"
-pywin32 = {markers = "platform_system == 'Windows'",version = "*"}
 glfw = "^2.5.3"
 opencv-python = "^4.6.0"
 google-cloud-vision = "^2.7.3"
 ConfigArgParse = "^1.5.3"
+pywin32 = {markers = "platform_system == 'Windows'", version = "*"}
+jisho-api = {markers = "platform_system == 'Windows'", version = "^0.1.8"}
+jamdict = {markers = "platform_system != 'Windows'", version = "*"}
+jamdict-data = {markers = "platform_system != 'Windows'", version = "*"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
