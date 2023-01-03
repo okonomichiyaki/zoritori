@@ -1,6 +1,6 @@
 # zōritori 草履取り
 
-a tool to help you read text in Japanese video games
+yet another tool to help you read text in Japanese video games
 
 ## features
 
