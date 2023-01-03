@@ -153,7 +153,8 @@ def draw_all_furigana(c, render_state):
         if filter(token):
             draw_furigana(c, token.furigana(), size)
 
-    if level == "hover" and render_state.hover:
+    hover = render_state.hover
+    if level == "hover" and hover and hover.has_kanji():
         draw_furigana(c, render_state.hover.furigana(), size)
 
 
