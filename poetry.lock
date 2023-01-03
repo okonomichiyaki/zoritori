@@ -106,6 +106,17 @@ files = [
 unicode-backport = ["unicodedata2"]
 
 [[package]]
+name = "chirptext"
+version = "0.1.2"
+description = "A minimalist collection of text processing tools for Python 3"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "chirptext-0.1.2.tar.gz", hash = "sha256:643c9c11508f509b37257e3f3a629a668c0908ae5f582d7b9f131234a7379303"},
+]
+
+[[package]]
 name = "click"
 version = "8.1.3"
 description = "Composable command line interface toolkit"
@@ -443,6 +454,32 @@ files = [
 ]
 
 [[package]]
+name = "jamdict"
+version = "0.1a11.post2"
+description = "Python library for using Japanese dictionaries and resources (Jim Breen's JMdict, KanjiDic2, KRADFILE, JMnedict)"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "jamdict-0.1a11.post2.tar.gz", hash = "sha256:fbb54de3d58ecdb9b53498ae873ab6519312c86bc848a9769d92b1b238d4c914"},
+]
+
+[package.dependencies]
+chirptext = ">=0.1,<=0.2"
+puchikarui = ">=0.1,<0.3"
+
+[[package]]
+name = "jamdict-data"
+version = "1.5"
+description = "Precompiled database for jamdict library for manipulating Jim Breen's JMdict, KanjiDic2, KRADFILE and JMnedict. Compiled date: 17 Apr 2021."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "jamdict_data-1.5.tar.gz", hash = "sha256:a4247dd9bb3148ab17c1b32fc56d7a7f1c35293b0d6ff2838c811f896d13f415"},
+]
+
+[[package]]
 name = "mouseinfo"
 version = "0.1.3"
 description = "An application to display XY position and RGB color information for the pixel currently under the mouse. Works on Python 2 and 3."
@@ -747,6 +784,17 @@ files = [
     {file = "protobuf-3.20.3-cp39-cp39-win_amd64.whl", hash = "sha256:03038ac1cfbc41aa21f6afcbcd357281d7521b4157926f30ebecc8d4ea59dcb7"},
     {file = "protobuf-3.20.3-py2.py3-none-any.whl", hash = "sha256:a7ca6d488aa8ff7f329d4c545b2dbad8ac31464f1d8b1c87ad1346717731e4db"},
     {file = "protobuf-3.20.3.tar.gz", hash = "sha256:2e3427429c9cffebf259491be0af70189607f365c2f41c7c3764af6f337105f2"},
+]
+
+[[package]]
+name = "puchikarui"
+version = "0.1"
+description = "A minimalist SQLite wrapper library for Python which supports ORM features."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "puchikarui-0.1.tar.gz", hash = "sha256:8ebe96e8683eac82624eb90dd517e26421e467637b3a1fe1ef5275ba2dacddc8"},
 ]
 
 [[package]]
@@ -3999,4 +4047,4 @@ testing = ["coverage (>=6.2)", "coverage-enable-subprocess (>=1)", "flaky (>=3.7
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "9751754f7442338baf1e47adb03f46377515450fef524c3689115e2ddfa17643"
+content-hash = "938093da7c9f3984a76990357ff2a8b27a6b8c640b472b57ab4682d2115ef59d"

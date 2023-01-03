@@ -1,6 +1,6 @@
 import logging
 
-# from jamdict import Jamdict
+from jamdict import Jamdict
 
 
 _logger = logging.getLogger("saru")
@@ -18,20 +18,10 @@ def _entry_to_list(entry):
 
 
 def lookup(s):
-    return None
-    # jam = Jamdict()
-    # result = jam.lookup(s)
-    # if result and len(result.entries) > 0:
-    #     entry = result.entries[0]
-    #     return _entry_to_list(entry)
-    # else:
-    #     return None
-
-
-def debug(s):
-    results = lookup(s)
-    if not results:
-        _logger.debug("dictionary found nothing for %s", s)
-        return
-    for result in results:
-        _logger.debug(result)
+    jam = Jamdict()
+    result = jam.lookup(s)
+    if result and len(result.entries) > 0:
+        entry = result.entries[0]
+        return _entry_to_list(entry)
+    else:
+        return None

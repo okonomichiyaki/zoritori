@@ -184,9 +184,8 @@ class Watcher(threading.Thread):
             hover = find_hover(self._last_sdata.tokens)
             if hover != self._last_hover:
                 self._last_hover = hover
-                self._logger.info(
-                    f"hovered token: {hover.surface() if hover else None}"
-                )
+                entry = dictionary.lookup(hover.surface()) if hover else None
+                self._logger.info(f"hovered token: %s", entry)
 
     def _any_clip(self):
         return self._saved_clip or self._secondary_clip or self._options.fullscreen
