@@ -4,7 +4,7 @@ import os
 import sys
 from pathlib import Path
 
-import zoritori.zoritori
+import zoritori.pipeline
 import zoritori.ui as ui
 from zoritori.options import get_options
 
@@ -40,7 +40,7 @@ def main():
         recognizer = Recognizer(options.TesseractExePath)
 
     if options.filename:
-        data = zoritori.zoritori.process_image_light(
+        data = zoritori.pipeline.process_image_light(
             options.filename, options, recognizer
         )
         if not options.debug:

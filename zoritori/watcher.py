@@ -20,7 +20,7 @@ from zoritori.screenshots import (
     screen_changed,
     take_screenshot_clip_only,
 )
-from zoritori.zoritori import process_image, process_image_light
+from zoritori.pipeline import process_image, process_image_light
 from zoritori.vocabulary import save_vocabulary
 from zoritori.strings import is_punctuation
 from zoritori.files import load_json, save_json
