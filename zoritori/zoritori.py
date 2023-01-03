@@ -6,13 +6,13 @@ from operator import itemgetter
 from statistics import median
 from dataclasses import dataclass
 
-from saru.translator import translate
-from saru.tokenizer import tokenize
-from saru.types import Furigana, SaruData, Box
-from saru.vocabulary import save_vocabulary
+from zoritori.translator import translate
+from zoritori.tokenizer import tokenize
+from zoritori.types import Furigana, ZoritoriData, Box
+from zoritori.vocabulary import save_vocabulary
 
 
-_logger = logging.getLogger("saru")
+_logger = logging.getLogger("zoritori")
 
 
 def _percent_ascii(ldata):
@@ -59,43 +59,43 @@ def _recognize_tokenize_translate(options, recognizer, filename, context):
         _logger.debug("translating...")
         translation = translate(text, options.DeepLUrl, options.DeepLKey)
 
-    return SaruData(text, translation, ldata, tokens, raw_data)
+    return ZoritoriData(text, translation, ldata, tokens, raw_data)
 
 
-def log_debug(saru):
-    #    for line in saru["cdata"]:
+def log_debug(zoritori):
+    #    for line in zoritori["cdata"]:
     #        for d in line:
     #            _logger.debug("%s %s %s", d.text, d.line_num, d.conf)
-    _logger.info(saru.original)
-    if saru.translation:
-        _logger.info(saru.translation)
+    _logger.info(zoritori.original)
+    if zoritori.translation:
+        _logger.info(zoritori.translation)
 
 
 def process_image_light(path, options, recognizer):
-    saru = _recognize_tokenize_translate(options, recognizer, path)
-    if saru and options.debug:
-        log_debug(saru)
-    return saru
+    zoritori = _recognize_tokenize_translate(options, recognizer, path)
+    if zoritori and options.debug:
+        log_debug(zoritori)
+    return zoritori
 
 
 def process_image(options, recognizer, full_path, text_path, context):
     """Processes an image for vocabulary collection and saving screenshots"""
-    saru = _recognize_tokenize_translate(
+    zoritori = _recognize_tokenize_translate(
         options, recognizer, text_path or full_path, context
     )
-    if saru is None:
+    if zoritori is None:
         return None
     notes_dir = options.NotesFolder
     if options.NotesFolder and len(options.NotesFolder) > 0:
-        text = saru.original
+        text = zoritori.original
         cleaned_up = text
         for c in ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "\n"]:
             cleaned_up = cleaned_up.replace(c, "-")
             new_filename = (Path(full_path).name).replace("xxxxx", cleaned_up)
         notes_path = Path(notes_dir) / new_filename
         os.rename(full_path, notes_path)
-        if not save_vocabulary(options.NotesFolder, saru.tokens, notes_path):
+        if not save_vocabulary(options.NotesFolder, zoritori.tokens, notes_path):
             os.remove(notes_path)
     if options.debug:
-        log_debug(saru)
-    return saru
+        log_debug(zoritori)
+    return zoritori

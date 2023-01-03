@@ -8,10 +8,10 @@ from dataclasses import dataclass
 import pytesseract
 from PIL import Image
 
-from saru.types import CharacterData
+from zoritori.types import CharacterData
 
 
-_logger = logging.getLogger("saru")
+_logger = logging.getLogger("zoritori")
 
 
 def _cast(row):

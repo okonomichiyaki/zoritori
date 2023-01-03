@@ -7,11 +7,11 @@ from itertools import groupby
 
 from google.cloud import vision_v1 as vision
 
-from saru.types import CharacterData, BlockData, RawData, Box
-from saru.recognizers.exceptions import RecognizerException
+from zoritori.types import CharacterData, BlockData, RawData, Box
+from zoritori.recognizers.exceptions import RecognizerException
 
 
-_logger = logging.getLogger("saru")
+_logger = logging.getLogger("zoritori")
 
 
 class Recognizer:

@@ -1,7 +1,7 @@
 import os
 
-from saru.files import get_path
-from saru.strings import is_ascii
+from zoritori.files import get_path
+from zoritori.strings import is_ascii
 
 
 def _filter_seen_vocab(folder, new_words):

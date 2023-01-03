@@ -1,8 +1,8 @@
 import skia
 import pyautogui
 
-from saru.files import load_json, save_json
-from saru.types import Box, Root, Token
+from zoritori.files import load_json, save_json
+from zoritori.types import Box, Root, Token
 
 
 def is_mouse_inside(box: Box):

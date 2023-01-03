@@ -1,8 +1,8 @@
 from collections import Counter
 import pytest
 
-from saru.vocabulary import save_vocabulary
-from saru.tokenizer import tokenize
+from zoritori.vocabulary import save_vocabulary
+from zoritori.tokenizer import tokenize
 
 
 def test_save_vocabulary(tmp_path):

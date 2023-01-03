@@ -1,6 +1,6 @@
 import pytest
 
-import saru.strings as s
+import zoritori.strings as s
 
 
 def test_is_ascii():

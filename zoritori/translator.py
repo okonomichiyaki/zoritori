@@ -5,7 +5,7 @@ from urllib import request, parse
 from urllib.error import URLError, HTTPError
 
 deepl_error_message = "Translate via DeepL was unsuccessful."
-_logger = logging.getLogger("saru")
+_logger = logging.getLogger("zoritori")
 
 
 def _parse(body):

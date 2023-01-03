@@ -2,7 +2,7 @@ from itertools import groupby
 
 import pytest
 
-import saru.tokenizer as t
+import zoritori.tokenizer as t
 
 # texts taken from `samples/examples of numerals.png`
 

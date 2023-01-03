@@ -3,7 +3,7 @@ import logging
 from jamdict import Jamdict
 
 
-_logger = logging.getLogger("saru")
+_logger = logging.getLogger("zoritori")
 
 
 def _entry_to_list(entry):

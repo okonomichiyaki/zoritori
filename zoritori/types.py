@@ -4,10 +4,10 @@ from dataclasses import dataclass
 import sudachipy
 import skia
 
-from saru.strings import katakana_to_hiragana, all_kana, is_ascii
+from zoritori.strings import katakana_to_hiragana, all_kana, is_ascii
 
 
-_logger = logging.getLogger("saru")
+_logger = logging.getLogger("zoritori")
 
 
 @dataclass
@@ -223,7 +223,7 @@ class Token:
             raise AttributeError
 
     def __repr__(self):
-        return f"saru.Token<{self._morpheme.surface()}>"
+        return f"zoritori.Token<{self._morpheme.surface()}>"
 
     def length(self):
         return self._morpheme.end() - self._morpheme.begin()
@@ -288,7 +288,7 @@ class RawData:
 
 
 @dataclass
-class SaruData:
+class ZoritoriData:
     """Enriched data from tokenization, translation, etc."""
 
     original: str

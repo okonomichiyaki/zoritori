@@ -11,22 +11,22 @@ from dataclasses import dataclass
 import glfw
 import skia
 
-from saru.overlay import Overlay
-from saru.drawing import draw
-from saru.screenshots import (
+from zoritori.overlay import Overlay
+from zoritori.drawing import draw
+from zoritori.screenshots import (
     take_screenshots,
     take_watch_screenshot,
     take_fullscreen_screenshot,
     screen_changed,
     take_screenshot_clip_only,
 )
-from saru.saru import process_image, process_image_light
-from saru.vocabulary import save_vocabulary
-from saru.strings import is_punctuation
-from saru.files import load_json, save_json
-from saru.types import SaruData, Box, Token
-from saru.clips import save_clips, load_clips, find_hover
-import saru.dictionary as dictionary
+from zoritori.zoritori import process_image, process_image_light
+from zoritori.vocabulary import save_vocabulary
+from zoritori.strings import is_punctuation
+from zoritori.files import load_json, save_json
+from zoritori.types import ZoritoriData, Box, Token
+from zoritori.clips import save_clips, load_clips, find_hover
+import zoritori.dictionary as dictionary
 
 
 @dataclass
@@ -41,7 +41,7 @@ class RenderState:
     subtitle_size: int
     subtitle_margin: int
     furigana_size: int
-    primary_data: SaruData
+    primary_data: ZoritoriData
     primary_clip: Box
     secondary_data: list[str]
     secondary_clip: Box
@@ -53,7 +53,7 @@ class Watcher(threading.Thread):
         threading.Thread.__init__(self)
         self._stop_flag = threading.Event()
         self._WATCH_MARGIN = 5  # TODO: magic number
-        self._logger = logging.getLogger("saru")
+        self._logger = logging.getLogger("zoritori")
 
         self._options = options
         self._recognizer = recognizer
@@ -67,9 +67,9 @@ class Watcher(threading.Thread):
         self._last_hover = None
         self._saved_clip = None
         self._secondary_clip = None
-        dot_saru = Path.home() / ".saru"
-        Path(dot_saru).mkdir(parents=True, exist_ok=True)
-        self._clips_path = dot_saru / "clips.json"
+        dot_zoritori = Path.home() / ".zoritori"
+        Path(dot_zoritori).mkdir(parents=True, exist_ok=True)
+        self._clips_path = dot_zoritori / "clips.json"
         self._render_state = None
 
     def stop(self):

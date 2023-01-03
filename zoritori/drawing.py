@@ -3,8 +3,8 @@ import logging
 import glfw
 import skia
 
-from saru.strings import is_ascii
-from saru.platform import get_ja_font
+from zoritori.strings import is_ascii
+from zoritori.platform import get_ja_font
 
 
 FILL_BLACK = skia.Paint(Style=skia.Paint.kFill_Style, Color=skia.ColorBLACK)
@@ -15,7 +15,7 @@ STROKE_GREEN = skia.Paint(Style=skia.Paint.kStroke_Style, Color=skia.ColorGREEN)
 STROKE_RED = skia.Paint(Style=skia.Paint.kStroke_Style, Color=skia.ColorRED)
 
 
-_logger = logging.getLogger("saru")
+_logger = logging.getLogger("zoritori")
 
 
 def draw(c, render_state):

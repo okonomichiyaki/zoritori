@@ -7,13 +7,13 @@ import glfw
 import skia
 from OpenGL import GL
 
-from saru.events import KeyEvent, ClipEvent
-from saru.types import Box, Root
+from zoritori.events import KeyEvent, ClipEvent
+from zoritori.types import Box, Root
 
 
 class Overlay:
     def __init__(self, title, event_queue):
-        self._logger = logging.getLogger("saru")
+        self._logger = logging.getLogger("zoritori")
         self._title = title
         self._event_queue = event_queue
         self._draw_queue = Queue()
@@ -38,18 +38,24 @@ class Overlay:
         # https://stackoverflow.com/questions/72588667/
         width = width - 1
         height = height - 1
-        window = glfw.create_window(
-            width, height, self._title, monitor, None
-        )
+        window = glfw.create_window(width, height, self._title, monitor, None)
         (actualw, actualh) = glfw.get_window_size(window)
         (x0, y0) = glfw.get_window_pos(window)
         if x0 > 0 or y0 > 0:
             new_w = actualw - x0
             new_h = actualh - y0
             glfw.set_window_size(window, new_w, new_h)
-            self._logger.debug("created window, adjusted to x0,y0=%d,%d w,h=%d,%d", x0, y0, new_w, new_h)
+            self._logger.debug(
+                "created window, adjusted to x0,y0=%d,%d w,h=%d,%d",
+                x0,
+                y0,
+                new_w,
+                new_h,
+            )
         else:
-            self._logger.debug("created window, x0,y0=%d,%d w,h=%d,%d", x0, y0, actualw, actualh)
+            self._logger.debug(
+                "created window, x0,y0=%d,%d w,h=%d,%d", x0, y0, actualw, actualh
+            )
         return window
 
     @contextlib.contextmanager
@@ -142,7 +148,7 @@ class Overlay:
         """Primary UI loop: sets up GLFW window, then waits for input and draw events"""
         with self._glfw_window() as window:
             if platform.system() == "Windows":
-                from saru.windows import enable_click_through
+                from zoritori.windows import enable_click_through
 
                 if not enable_click_through(self._title):
                     self._logger.warning(

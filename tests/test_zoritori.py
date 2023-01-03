@@ -1,4 +1,4 @@
-from saru import __version__
+from zoritori import __version__
 
 
 def test_version():

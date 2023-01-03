@@ -2,10 +2,10 @@ import logging
 
 from sudachipy import tokenizer, dictionary
 
-from saru.types import Token, CharacterData, MergedName
+from zoritori.types import Token, CharacterData, MergedName
 
 
-_logger = logging.getLogger("saru")
+_logger = logging.getLogger("zoritori")
 
 
 def _convert(morphemes, ldata):

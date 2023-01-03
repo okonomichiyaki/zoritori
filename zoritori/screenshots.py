@@ -2,11 +2,11 @@ import logging
 import pyautogui
 from pathlib import Path
 
-from saru.files import get_path
-from saru.types import CharacterData, Box
+from zoritori.files import get_path
+from zoritori.types import CharacterData, Box
 
 
-_logger = logging.getLogger("saru")
+_logger = logging.getLogger("zoritori")
 
 
 def take_watch_screenshot(folder, regions):
