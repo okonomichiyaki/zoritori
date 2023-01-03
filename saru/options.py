@@ -18,7 +18,7 @@ def get_options():
         "-f",
         "--furigana",
         default="none",
-        choices=["none", "some", "all"],
+        choices=["none", "some", "all", "hover"],
         action="store",
         help=(
             "Determines the level of furigana attached to kanji. "

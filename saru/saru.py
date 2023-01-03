@@ -15,37 +15,6 @@ from saru.vocabulary import save_vocabulary
 _logger = logging.getLogger("saru")
 
 
-def _get_furigana(tokens, cdata, level, context):
-    if level == "none":
-        return []
-
-    def furigana(token):
-        line_num = token.line_num()
-        char_num = token.char_num()
-        length = token.length()
-        reading = token.reading_form()
-        first = cdata[line_num][char_num]
-        last = cdata[line_num][char_num + length - 1]
-        left = first.left
-        right = last.left + last.width
-        x = left + (right - left) / 2
-        y = first.top
-        box = Box(
-            x, y, None, None, context
-        )  # TODO: consider adding a Point class instead
-        return Furigana(reading, box)
-
-    def filter(m):
-        if level == "all":
-            return m.has_kanji()
-        if level == "some":
-            return m.part_of_speech()[1] == "固有名詞"
-        else:
-            return False
-
-    return [furigana(token) for token in tokens if filter(token)]
-
-
 def _percent_ascii(ldata):
     a = 0
     t = 0
@@ -72,7 +41,6 @@ def _get_text(ldata):
 def _recognize_tokenize_translate(options, recognizer, filename, context):
     debug = options.debug
     should_translate = options.translate
-    furigana_level = options.furigana
 
     _logger.debug("recognizing...")
     raw_data = recognizer.recognize(filename, context)
@@ -85,14 +53,13 @@ def _recognize_tokenize_translate(options, recognizer, filename, context):
 
     _logger.debug("tokenizing...")
     tokens = tokenize(text, ldata)
-    furigana = _get_furigana(tokens, ldata, furigana_level, context)
 
     translation = None
     if should_translate:
         _logger.debug("translating...")
         translation = translate(text, options.DeepLUrl, options.DeepLKey)
 
-    return SaruData(text, translation, ldata, tokens, furigana, raw_data)
+    return SaruData(text, translation, ldata, tokens, raw_data)
 
 
 def log_debug(saru):

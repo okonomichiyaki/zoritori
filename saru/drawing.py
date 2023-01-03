@@ -42,8 +42,7 @@ def draw(c, render_state):
     if render_state.debug and sdata.raw_data.blocks:
         draw_block_boxes(c, sdata.raw_data.blocks)
 
-    if sdata.furigana:
-        draw_furigana(c, render_state.furigana_size, sdata.furigana)
+    draw_all_furigana(c, render_state)
 
     if sdata.translation:
         draw_subtitles(
@@ -126,18 +125,36 @@ def draw_subtitles(
         draw_laser_point(c, x0, y0)
 
 
-def draw_furigana(c, size, fs):
-    for f in fs:
-        text = f.reading
-        x = f.x
-        y = f.y
-        typeface = skia.Typeface(get_ja_font())
-        font = skia.Font(typeface, size)
-        width = font.measureText(text)
-        x = x - width / 2
-        # y parameter to draw_text appears to be the baseline, and text is drawn above it
-        buffer = size / 4
-        c.drawString(text, x, y - buffer, font, FILL_BLACK)
+def draw_furigana(c, f, size):
+    text = f.reading
+    x = f.x
+    y = f.y
+    typeface = skia.Typeface(get_ja_font())
+    font = skia.Font(typeface, size)
+    width = font.measureText(text)
+    x = x - width / 2
+    buffer = size / 4
+    c.drawString(text, x, y - buffer, font, FILL_BLACK)
+
+
+def draw_all_furigana(c, render_state):
+    level = render_state.furigana
+    size = render_state.furigana_size
+
+    def filter(m):
+        if level == "all":
+            return m.has_kanji()
+        if level == "some":
+            return m.part_of_speech()[1] == "固有名詞"
+        else:
+            return False
+
+    for token in render_state.primary_data.tokens:
+        if filter(token):
+            draw_furigana(c, token.furigana(), size)
+
+    if level == "hover" and render_state.hover:
+        draw_furigana(c, render_state.hover.furigana(), size)
 
 
 def draw_parts_of_speech(c, sdata):

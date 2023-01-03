@@ -24,7 +24,7 @@ from saru.saru import process_image, process_image_light
 from saru.vocabulary import save_vocabulary
 from saru.strings import is_punctuation
 from saru.files import load_json, save_json
-from saru.types import SaruData, Box
+from saru.types import SaruData, Box, Token
 from saru.clips import save_clips, load_clips, find_hover
 import saru.dictionary as dictionary
 
@@ -37,6 +37,7 @@ class RenderState:
     translate: bool
     debug: bool
     parts_of_speech: bool
+    furigana: str
     subtitle_size: int
     subtitle_margin: int
     furigana_size: int
@@ -44,6 +45,7 @@ class RenderState:
     primary_clip: Box
     secondary_data: list[str]
     secondary_clip: Box
+    hover: Token
 
 
 class Watcher(threading.Thread):
@@ -68,6 +70,7 @@ class Watcher(threading.Thread):
         dot_saru = Path.home() / ".saru"
         Path(dot_saru).mkdir(parents=True, exist_ok=True)
         self._clips_path = dot_saru / "clips.json"
+        self._render_state = None
 
     def stop(self):
         self._stop_flag.set()
@@ -122,14 +125,16 @@ class Watcher(threading.Thread):
     def _process(self):
         """Take a fresh screenshot and process it. if relevant, trigger drawing and update watch"""
 
-        render_state = RenderState(
+        self._render_state = RenderState(
             self._options.fullscreen,
             self._options.translate,
             self._options.debug,
             self._options.parts_of_speech,
+            self._options.furigana,
             self._options.SubtitleSize,
             self._options.SubtitleMargin,
             self._options.FuriganaSize,
+            None,
             None,
             None,
             None,
@@ -140,8 +145,8 @@ class Watcher(threading.Thread):
             sdata = process_image_light(path, self._options, self._recognizer)
             if sdata and len(sdata.original) > 0:
                 self._logger.debug("secondary clip: %s", sdata.original)
-                render_state.secondary_data = dictionary.lookup(sdata.original)
-                render_state.secondary_clip = self._secondary_clip
+                self._render_state.secondary_data = dictionary.lookup(sdata.original)
+                self._render_state.secondary_clip = self._secondary_clip
             self._secondary_clip = None
 
         if self._saved_clip:  # TODO: could check if this has changed
@@ -156,9 +161,9 @@ class Watcher(threading.Thread):
             if sdata:
                 self._last_sdata = sdata
                 self._update_watch()
-                render_state.primary_clip = self._saved_clip
-                render_state.primary_data = sdata
-                self._overlay.draw(lambda c: draw(c, render_state))
+                self._render_state.primary_clip = self._saved_clip
+                self._render_state.primary_data = sdata
+                self._overlay.draw(lambda c: draw(c, self._render_state))
         elif self._options.fullscreen:
             full_path = take_fullscreen_screenshot(self._options.NotesFolder)
             sdata = process_image(
@@ -174,9 +179,9 @@ class Watcher(threading.Thread):
                 rect = skia.Rect.MakeXYWH(
                     b.box.x, b.box.y, b.box.width, b.box.height
                 )  # screen coordinates
-                render_state.primary_clip = rect
-                render_state.primary_data = sdata
-                self._overlay.draw(lambda c: draw(c, render_state))
+                self._render_state.primary_clip = rect
+                self._render_state.primary_data = sdata
+                self._overlay.draw(lambda c: draw(c, self._render_state))
 
     def _update_hover(self):
         """Check if the mouse cursor is hovering over a token, and if so save the token"""
@@ -186,6 +191,8 @@ class Watcher(threading.Thread):
                 self._last_hover = hover
                 entry = dictionary.lookup(hover.surface()) if hover else None
                 self._logger.info(f"hovered token: %s", entry)
+                return True
+        return False
 
     def _any_clip(self):
         return self._saved_clip or self._secondary_clip or self._options.fullscreen
@@ -206,13 +213,16 @@ class Watcher(threading.Thread):
                 self._overlay.clear(block=True)
                 try:
                     self._process()
+                    self._update_hover()
                 except Exception as e:
                     self._logger.error(
                         "Exception while processing screenshot; %s", e.message
                     )
                     self.stop()
                     self._overlay.stop()
-            self._update_hover()
+            elif self._update_hover() and self._render_state:
+                self._render_state.hover = self._last_hover
+                self._overlay.draw(lambda c: draw(c, self._render_state))
 
         save_clips(self._saved_clip, self._clips_path)
 

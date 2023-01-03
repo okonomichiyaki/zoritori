@@ -185,11 +185,33 @@ class Token:
         width = self._cdata[-1].left + self._cdata[-1].width - left
         return Box(left, top, width, height, context)
 
+    def furigana(self):
+        line_num = self.line_num()
+        char_num = self.char_num()
+        length = self.length()
+        reading = self.reading_form()
+        first = self.first()
+        last = self.last()
+        left = first.left
+        right = last.left + last.width
+        x = left + (right - left) / 2
+        y = first.top
+        box = Box(
+            x, y, None, None, first.context
+        )  # TODO: consider adding a Point class instead
+        return Furigana(reading, box)
+
     def line_num(self):
         return self._line_num
 
     def char_num(self):
         return self._char_num
+
+    def first(self):
+        return self._cdata[0]
+
+    def last(self):
+        return self._cdata[-1]
 
     def length(self):
         return self._morpheme.end() - self._morpheme.begin()
@@ -273,5 +295,4 @@ class SaruData:
     translation: str
     cdata: list[list[CharacterData]]
     tokens: list[Token]
-    furigana: list[Furigana]
     raw_data: RawData
