@@ -25,7 +25,8 @@ from zoritori.vocabulary import save_vocabulary
 from zoritori.strings import is_punctuation
 from zoritori.files import load_json, save_json
 from zoritori.types import ZoritoriData, Box, Token
-from zoritori.clips import save_clips, load_clips, find_hover
+from zoritori.clips import find_hover
+from zoritori.settings import save_clips, load_clips
 import zoritori.dictionary as dictionary
 
 
@@ -50,7 +51,7 @@ class RenderState:
 
 
 class Watcher(threading.Thread):
-    def __init__(self, options, recognizer, event_queue, overlay, watch_dir):
+    def __init__(self, options, recognizer, event_queue, overlay, watch_dir, settings_path):
         threading.Thread.__init__(self)
         self._stop_flag = threading.Event()
         self._WATCH_MARGIN = 5  # TODO: magic number
@@ -69,9 +70,7 @@ class Watcher(threading.Thread):
         self._last_hover_lookup = None
         self._saved_clip = None
         self._secondary_clip = None
-        dot_zoritori = Path.home() / ".zoritori"
-        Path(dot_zoritori).mkdir(parents=True, exist_ok=True)
-        self._clips_path = dot_zoritori / "clips.json"
+        self._settings_path = settings_path
         self._render_state = None
 
     def stop(self):
@@ -215,7 +214,7 @@ class Watcher(threading.Thread):
     def run(self):
         """Primary watch loop, periodically takes screenshots and reprocesses text"""
 
-        self._saved_clip = load_clips(self._clips_path)
+        self._saved_clip = load_clips(self._settings_path)
 
         while not self._stop_flag.is_set():
             try:
@@ -240,7 +239,7 @@ class Watcher(threading.Thread):
                 self._render_state.hover_lookup = self._last_hover_lookup
                 self._overlay.draw(lambda c: draw(c, self._render_state))
 
-        save_clips(self._saved_clip, self._clips_path)
+        save_clips(self._saved_clip, self._settings_path)
 
     def _get_first_non_punct(self, sdata):
         first_line = sdata.cdata[0]
