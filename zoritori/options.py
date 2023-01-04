@@ -9,7 +9,7 @@ def get_options():
     parser.add("-d", "--debug", action="store_true")
     parser.add("-n", "--no-watch", action="store_true")
     parser.add("-t", "--translate", action="store_true")
-    parser.add("-p", "--parts-of-speech", action="store_true")
+    parser.add("-p", "--parts-of-speech", action="store_true", default=True)
     parser.add("--fullscreen", action="store_true")
     parser.add(
         "-l", "--log-level", default="info", choices=["info", "debug"], action="store"
@@ -17,7 +17,7 @@ def get_options():
     parser.add(
         "-f",
         "--furigana",
-        default="none",
+        default="all",
         choices=["none", "some", "all", "hover"],
         action="store",
         help=(
