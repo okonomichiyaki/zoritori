@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import pytesseract
 from PIL import Image
 
-from zoritori.types import CharacterData
+from zoritori.types import CharacterData, BlockData, RawData, Box
 
 
 _logger = logging.getLogger("zoritori")
@@ -101,7 +101,7 @@ def _get_median(cdata, field):
     return median(values)
 
 
-def _calculate_boxes(actuals, lines):
+def _calculate_boxes(actuals, context, lines):
     """Extract bounding box data from Tesseract tsv row"""
 
     def _calculate_boxes_for_line(actuals, line):
@@ -112,22 +112,24 @@ def _calculate_boxes(actuals, lines):
         leftmost = extent["leftmost"]
         for i, d in enumerate(line):
             if actuals:
-                d["box"] = (d["left"], d["top"], d["width"], d["height"])
+                box = Box(d["left"], d["top"], d["width"], d["height"], context)
             else:
                 # actual box data from Tesseract is sometimes wildly off
                 # this returns a best estimate, based on median width/top/height per line
-                d["box"] = (
+                box = Box(
                     leftmost + i * estimated_cwidth,
                     estimated_top,
                     estimated_cwidth,
                     estimated_cheight,
+                    context
                 )
+            d["box"] = box
 
     for line in lines:
         _calculate_boxes_for_line(actuals, line)
 
 
-def _convert_to_cdata(lines):
+def _convert_to_cdata(lines: list[dict]) -> list[[CharacterData]]:
     """Convert Tesseract tsv rows to CharacterData"""
 
     def _row_to_cdata(row):
@@ -135,13 +137,28 @@ def _convert_to_cdata(lines):
             row["text"],
             row["line_num"],
             row["conf"],
-            row["box"][0],
-            row["box"][1],
-            row["box"][2],
-            row["box"][3],
+            row["box"]
         )
 
     return [[_row_to_cdata(row) for row in line] for line in lines]
+
+
+def _get_box_for_block(cdata, context):
+    """Construct a bounding box for the block of text"""
+    first = cdata[0][0].box
+    max_right = -1
+    max_bot = -1
+    for line in cdata:
+        for c in line:
+            w2 = c.box.left + c.box.width
+            if w2 > max_right:
+                max_right = w2
+            h2 = c.box.top + c.box.height
+            if h2 > max_bot:
+                max_bot = h2
+    w = max_right - first.left
+    h = max_bot - first.top
+    return Box(first.left, first.top, w, h, context)
 
 
 class Recognizer:
@@ -149,13 +166,13 @@ class Recognizer:
         pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
         self.actual_boxes = actual_boxes
 
-    def recognize(self, filename: str) -> list[list[CharacterData]]:
+    def recognize(self, path: str, context=None) -> RawData:
         """
         Extract character data from image (expected path to image file), returns parsed Tesseract data
         Tesseract data headers:
         level, page_num, block_num, par_num, line_num, word_num, left, top, width, height, conf, text
         """
-        tsv = pytesseract.image_to_data(Image.open(filename), lang="jpn")
+        tsv = pytesseract.image_to_data(Image.open(path), lang="jpn")
         _logger.debug(f"raw tsv from Tesseract:\n{tsv}")
         f = StringIO(tsv)
         reader = DictReader(f, delimiter="\t")
@@ -171,5 +188,9 @@ class Recognizer:
         _fix_line_numbers(lines)
         lines = [c for c in lines if not _probably_line_break(c)]
         lines = [list(it) for k, it in groupby(lines, lambda d: d["line_num"])]
-        _calculate_boxes(self.actual_boxes, lines)
-        return _convert_to_cdata(lines)
+        _calculate_boxes(self.actual_boxes, context, lines)
+        cdata = _convert_to_cdata(lines)
+        box = _get_box_for_block(cdata, context)
+        block = BlockData(cdata, box)
+        blocks = [block]
+        return RawData(cdata, blocks)

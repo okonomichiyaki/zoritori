@@ -18,7 +18,7 @@ class Recognizer:
     def __init__(self):
         self._client = vision.ImageAnnotatorClient()
 
-    def recognize(self, path, context=None) -> RawData:
+    def recognize(self, path: str, context=None) -> RawData:
         response = self._detect_text(path)
         return self._collect_symbols(response, context)
 

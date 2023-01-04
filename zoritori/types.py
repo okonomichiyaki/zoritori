@@ -254,7 +254,7 @@ class Token:
 class RawData:
     """Response data from OCR engine"""
 
-    def __init__(self, lines, blocks):
+    def __init__(self, lines: list[[CharacterData]], blocks: list[BlockData]):
         self.lines = lines
         self.blocks = blocks
         self._primary_block = None
