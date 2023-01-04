@@ -62,15 +62,6 @@ def _recognize_tokenize_translate(options, recognizer, filename, context):
     return ZoritoriData(text, translation, ldata, tokens, raw_data)
 
 
-def log_debug(zoritori):
-    #    for line in zoritori["cdata"]:
-    #        for d in line:
-    #            _logger.debug("%s %s %s", d.text, d.line_num, d.conf)
-    _logger.info(zoritori.original)
-    if zoritori.translation:
-        _logger.info(zoritori.translation)
-
-
 def process_image_light(path, options, recognizer, context=None):
     zoritori = _recognize_tokenize_translate(options, recognizer, path, context)
     if zoritori and options.debug:
@@ -96,6 +87,7 @@ def process_image(options, recognizer, full_path, text_path, context):
         os.rename(full_path, notes_pic)
         if not save_vocabulary(notes_dir, zoritori.tokens, notes_pic):
             os.remove(notes_pic)
-    if options.debug:
-        log_debug(zoritori)
+    _logger.info(zoritori.original)
+    if zoritori.translation:
+        _logger.info(zoritori.translation)
     return zoritori

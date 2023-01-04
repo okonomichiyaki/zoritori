@@ -16,7 +16,6 @@ from zoritori.drawing import draw
 from zoritori.screenshots import (
     take_screenshots,
     take_watch_screenshot,
-    take_fullscreen_screenshot,
     screen_changed,
     take_screenshot_clip_only,
 )
@@ -34,7 +33,6 @@ import zoritori.dictionary as dictionary
 class RenderState:
     """Snapshot of app state that gets drawn to the screen"""
 
-    fullscreen: bool
     translate: bool
     debug: bool
     parts_of_speech: bool
@@ -84,20 +82,20 @@ class Watcher(threading.Thread):
         clip = event.get_clip()
         key = event.get_key()
         if clip and (key == glfw.KEY_R or key == glfw.MOUSE_BUTTON_1):
-            self._logger.info(f"watcher got primary clip event: {clip}")
+            self._logger.debug(f"watcher got primary clip event: {clip}")
             self._saved_clip = clip
             self._saved_clip_dirty = True
             return True
         if clip and (key == glfw.KEY_Q or key == glfw.MOUSE_BUTTON_2):
-            self._logger.info(f"watcher got secondary clip event: {clip}")
+            self._logger.debug(f"watcher got secondary clip event: {clip}")
             self._secondary_clip = clip
             self._saved_clip_dirty = False
             return True
         elif key:
-            self._logger.info(f"watcher got key event: {key}")
+            self._logger.debug(f"watcher got key event: {key}")
             return self._handle_key(key)
         else:
-            self._logger.info(f"watcher got unknown event: {event}")
+            self._logger.debug(f"watcher got unknown event: {event}")
             return False
 
     def _open_search(self, url):
@@ -141,7 +139,6 @@ class Watcher(threading.Thread):
         """Take a fresh screenshot and process it. if relevant, trigger drawing and update watch"""
 
         self._render_state = RenderState(
-            self._options.Fullscreen,
             self._options.Translate,
             self._options.debug,
             self._options.ProperNouns,
@@ -185,24 +182,6 @@ class Watcher(threading.Thread):
                 self._render_state.primary_clip = self._saved_clip
                 self._render_state.primary_data = sdata
                 should_draw = True
-        elif self._options.Fullscreen:
-            full_path = take_fullscreen_screenshot(self._options.NotesFolder)
-            sdata = process_image(
-                self._options,
-                self._recognizer,
-                full_path,
-                None,
-            )
-            if sdata:
-                self._last_sdata = sdata
-                self._update_watch()
-                b = sdata.raw_data.get_primary_block()
-                rect = skia.Rect.MakeXYWH(
-                    b.box.x, b.box.y, b.box.width, b.box.height
-                )  # screen coordinates
-                self._render_state.primary_clip = rect
-                self._render_state.primary_data = sdata
-                should_draw = True
         if should_draw:
             self._overlay.draw(lambda c: draw(c, self._render_state))
 
@@ -220,7 +199,7 @@ class Watcher(threading.Thread):
         return False
 
     def _any_clip(self):
-        return self._saved_clip or self._secondary_clip or self._options.fullscreen
+        return self._saved_clip or self._secondary_clip
 
     def run(self):
         """Primary watch loop, periodically takes screenshots and reprocesses text"""

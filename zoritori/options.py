@@ -47,11 +47,6 @@ def get_options():
         "--TesseractExePath", action="store", help=("Path to Tesseract executable")
     )
     parser.add("-t", "--Translate", action="store_true")
-    parser.add("--Fullscreen", action="store_true", help=(
-        "If true, attempts to detect any and all text on the screen.",
-        "This is slower and less reliable then using a specific region.",
-        "Only really works with Google Cloud Vision API."
-    ))
     parser.add("--ProperNouns", action="store_true", default=True)
     parser.add("--DeepLUrl", action="store", help=("DeepL API translate URL"))
     parser.add("--DeepLKey", action="store", help=("DeepL API key"))
