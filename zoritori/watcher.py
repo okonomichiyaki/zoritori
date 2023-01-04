@@ -82,11 +82,11 @@ class Watcher(threading.Thread):
             return False
         clip = event.get_clip()
         key = event.get_key()
-        if clip and key == glfw.KEY_R:
+        if clip and (key == glfw.KEY_R or key == glfw.MOUSE_BUTTON_1):
             self._logger.info(f"watcher got primary clip event: {clip}")
             self._saved_clip = clip
             return True
-        if clip and key == glfw.KEY_Q:
+        if clip and (key == glfw.KEY_Q or key == glfw.MOUSE_BUTTON_2):
             self._logger.info(f"watcher got secondary clip event: {clip}")
             self._secondary_clip = clip
             return True

@@ -22,7 +22,7 @@ _logger = logging.getLogger("zoritori")
 
 def main_loop(options, recognizer):
     event_queue = SimpleQueue()
-    overlay = Overlay("zoritori", event_queue)
+    overlay = Overlay(options, "zoritori", event_queue)
     with tempfile.TemporaryDirectory() as temp_dir:
         watcher = Watcher(options, recognizer, event_queue, overlay, temp_dir, get_settings_path())
         watcher.start()

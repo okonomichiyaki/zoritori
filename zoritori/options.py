@@ -50,6 +50,7 @@ def get_options():
     parser.add("--NotesFolder", action="store", help=("Path to notes folder. If present, all notes and screenshots will be saved here."))
     parser.add("--NotesRoot", action="store", help=("Path to notes parent folder. If present, and NotesFolder is absent, will save notes and screenshots for each session as a new folder"))
     parser.add("--NotesPrefix", action="store", help=("Prefix for session folders"))
+    parser.add("--ClickThroughMode", action="store_true", help=("If true, allow mouse clicks to pass through transparent window. Windows-only"))
     parser.add(
         "-c", "--config", required=True, is_config_file=True, help="Path to config file"
     )

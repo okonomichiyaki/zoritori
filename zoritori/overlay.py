@@ -1,5 +1,4 @@
 import logging
-import platform
 from queue import Queue
 
 import contextlib
@@ -9,10 +8,10 @@ from OpenGL import GL
 
 from zoritori.events import KeyEvent, ClipEvent
 from zoritori.types import Box, Root
-
+import zoritori.platform as platform
 
 class Overlay:
-    def __init__(self, title, event_queue):
+    def __init__(self, options, title, event_queue):
         self._logger = logging.getLogger("zoritori")
         self._title = title
         self._event_queue = event_queue
@@ -20,6 +19,7 @@ class Overlay:
         self._start_pos = None
         self._stop = False
         self._window = None
+        self._click_through_mode = options.ClickThroughMode
 
     def get_screen_size(self):
         monitor = glfw.get_primary_monitor()
@@ -71,6 +71,17 @@ class Overlay:
 
         self._window = self._create_window()
 
+        def mouse_button_callback(window, button, action, mods):
+            if button != glfw.MOUSE_BUTTON_1 and button != glfw.MOUSE_BUTTON_2:
+                return
+            if action == glfw.RELEASE:
+                clip = self._get_clip(window)
+                self._start_pos = None
+                if clip.width > 0 and clip.height > 0:
+                    self._event_queue.put_nowait(ClipEvent(button, clip))
+            elif action == glfw.PRESS:
+                self._start_pos = glfw.get_cursor_pos(window)
+
         def key_callback(window, key, scancode, action, mods):
             # self._logger.debug(
             #    f"key_callback: key={key} scancode={scancode} action={action}"
@@ -89,6 +100,7 @@ class Overlay:
                 self._start_pos = glfw.get_cursor_pos(window)
 
         glfw.set_key_callback(self._window, key_callback)
+        glfw.set_mouse_button_callback(self._window, mouse_button_callback)
         glfw.make_context_current(self._window)
         yield self._window
         glfw.terminate()
@@ -147,14 +159,8 @@ class Overlay:
     def ui_loop(self):
         """Primary UI loop: sets up GLFW window, then waits for input and draw events"""
         with self._glfw_window() as window:
-            if platform.system() == "Windows":
-                from zoritori.windows import enable_click_through
-
-                if not enable_click_through(self._title):
-                    self._logger.warning(
-                        f"Failed to enable click through for window {self._title}"
-                    )
-
+            if self._click_through_mode:
+                platform.enable_click_through(self._title)
             GL.glClear(GL.GL_COLOR_BUFFER_BIT)
             with self._skia_surface(window) as surface:
                 with surface as canvas:
