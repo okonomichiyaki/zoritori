@@ -24,7 +24,11 @@ def main_loop(options, recognizer):
     event_queue = SimpleQueue()
     overlay = Overlay(options, "zoritori", event_queue)
     with tempfile.TemporaryDirectory() as temp_dir:
-        watcher = Watcher(options, recognizer, event_queue, overlay, temp_dir, get_settings_path())
+        if options.files_debug:
+            working_dir = options.NotesFolder
+        else:
+            working_dir = temp_dir
+        watcher = Watcher(options, recognizer, event_queue, overlay, working_dir, get_settings_path())
         watcher.start()
         try:
             overlay.ui_loop()

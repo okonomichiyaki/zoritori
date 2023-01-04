@@ -30,6 +30,9 @@ class Box:
         self._height = height
         self._parent_context = parent_context
 
+    def __repr__(self):
+        return f"zoritori.Box<{self._left, self._top, self._width, self._height}>"
+
     def to_skia_rect(self):
         return skia.Rect.MakeXYWH(self.clientx, self.clienty, self.width, self.height)
 
@@ -266,14 +269,17 @@ class RawData:
             return
         screen_height = 1080  # TODO: magic number
         screen_width = 1920  # TODO: magic number
-        blocks = filter(lambda block: block.screeny > screen_height / 2, self.blocks)
+        blocks = [block for block in self.blocks if block.screeny > screen_height / 2]
         # largest_by_pixels = max(self.blocks, key=lambda block: block.width * block.height)
         # largest_by_chars = max(self.blocks, key=lambda block: block.char_count())
-        closest_to_center = min(
-            blocks,
-            key=lambda block: abs(block.screenx + block.width / 2 - screen_width / 2),
-        )
-        self._primary_block = closest_to_center
+        if len(blocks) > 0:
+            closest_to_center = min(
+                blocks,
+                key=lambda block: abs(block.screenx + block.width / 2 - screen_width / 2),
+            )
+            self._primary_block = closest_to_center
+        else:
+            self._primary_block = self.blocks[0]
 
     def get_primary_block(self):
         self._find_primary_block()

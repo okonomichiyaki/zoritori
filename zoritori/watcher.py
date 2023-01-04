@@ -69,6 +69,7 @@ class Watcher(threading.Thread):
         self._last_hover = None
         self._last_hover_lookup = None
         self._saved_clip = None
+        self._saved_clip_dirty = True
         self._secondary_clip = None
         self._settings_path = settings_path
         self._render_state = None
@@ -85,10 +86,12 @@ class Watcher(threading.Thread):
         if clip and (key == glfw.KEY_R or key == glfw.MOUSE_BUTTON_1):
             self._logger.info(f"watcher got primary clip event: {clip}")
             self._saved_clip = clip
+            self._saved_clip_dirty = True
             return True
         if clip and (key == glfw.KEY_Q or key == glfw.MOUSE_BUTTON_2):
             self._logger.info(f"watcher got secondary clip event: {clip}")
             self._secondary_clip = clip
+            self._saved_clip_dirty = False
             return True
         elif key:
             self._logger.info(f"watcher got key event: {key}")
@@ -153,16 +156,21 @@ class Watcher(threading.Thread):
             None,
             None,
         )
+        should_draw = False
+
         if self._secondary_clip:
             path = take_screenshot_clip_only(self._watch_dir, self._secondary_clip)
-            sdata = process_image_light(path, self._options, self._recognizer)
+            sdata = process_image_light(path, self._options, self._recognizer, self._secondary_clip)
             if sdata and len(sdata.original) > 0:
                 self._logger.debug("secondary clip: %s", sdata.original)
                 self._render_state.secondary_data = dictionary.lookup(sdata.original)
                 self._render_state.secondary_clip = self._secondary_clip
+                self._render_state.primary_clip = self._saved_clip
+                self._render_state.primary_data = self._last_sdata
+                should_draw = True
             self._secondary_clip = None
 
-        if self._saved_clip:  # TODO: could check if this has changed
+        if self._saved_clip and self._saved_clip_dirty:
             (full_path, text_path) = take_screenshots(self._watch_dir, self._saved_clip)
             sdata = process_image(
                 self._options,
@@ -176,8 +184,8 @@ class Watcher(threading.Thread):
                 self._update_watch()
                 self._render_state.primary_clip = self._saved_clip
                 self._render_state.primary_data = sdata
-                self._overlay.draw(lambda c: draw(c, self._render_state))
-        elif self._options.fullscreen:
+                should_draw = True
+        elif self._options.Fullscreen:
             full_path = take_fullscreen_screenshot(self._options.NotesFolder)
             sdata = process_image(
                 self._options,
@@ -194,7 +202,10 @@ class Watcher(threading.Thread):
                 )  # screen coordinates
                 self._render_state.primary_clip = rect
                 self._render_state.primary_data = sdata
-                self._overlay.draw(lambda c: draw(c, self._render_state))
+                should_draw = True
+        if should_draw:
+            self._overlay.draw(lambda c: draw(c, self._render_state))
+
 
     def _update_hover(self):
         """Check if the mouse cursor is hovering over a token, and if so save the token"""

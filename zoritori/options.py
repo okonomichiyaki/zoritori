@@ -7,6 +7,7 @@ def get_options():
         description="Capture Japanese text from a screenshot or from the screen",
     )
     parser.add("-d", "--debug", action="store_true")
+    parser.add("--files-debug", action="store_true")
     parser.add("-n", "--no-watch", action="store_true")
     parser.add(
         "-l", "--log-level", default="info", choices=["info", "debug"], action="store"
