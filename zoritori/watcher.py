@@ -203,7 +203,7 @@ class Watcher(threading.Thread):
             if hover != self._last_hover:
                 self._last_hover = hover
                 entry = dictionary.lookup(hover.surface()) if hover else None
-                self._logger.info(f"hovered token: %s", entry)
+                self._logger.debug(f"hovered token: %s", entry)
                 self._last_hover_lookup = entry
                 return True
         return False
