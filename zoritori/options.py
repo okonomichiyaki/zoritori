@@ -58,12 +58,4 @@ def get_options():
     parser.add("--NotesRoot", action="store", help=("Path to notes parent folder. If present, and NotesFolder is absent, will save notes and screenshots for each session as a new folder"))
     parser.add("--NotesPrefix", action="store", help=("Prefix for session folders"))
     parser.add("--ClickThroughMode", action="store_true", help=("If true, allow mouse clicks to pass through transparent window. Windows-only"))
-    parser.add(
-        "filename",
-        metavar="filename",
-        type=str,
-        nargs="?",
-        default=None,
-        help="Path to a screenshot. If present, will output JSON; if absent, will start overlay.",
-    )
     return parser.parse_args()

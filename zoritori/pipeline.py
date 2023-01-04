@@ -71,8 +71,8 @@ def log_debug(zoritori):
         _logger.info(zoritori.translation)
 
 
-def process_image_light(path, options, recognizer):
-    zoritori = _recognize_tokenize_translate(options, recognizer, path)
+def process_image_light(path, options, recognizer, context=None):
+    zoritori = _recognize_tokenize_translate(options, recognizer, path, context)
     if zoritori and options.debug:
         log_debug(zoritori)
     return zoritori

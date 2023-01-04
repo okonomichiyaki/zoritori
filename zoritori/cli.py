@@ -48,12 +48,4 @@ def main():
 
         recognizer = Recognizer(options.TesseractExePath)
 
-    if options.filename:
-        data = zoritori.pipeline.process_image_light(
-            options.filename, options, recognizer
-        )
-        if not options.debug:
-            sys.stdout.reconfigure(encoding="utf-8", newline="\n")
-            print(json.dumps(data))
-    else:
-        ui.main_loop(options, recognizer)
+    ui.main_loop(options, recognizer)
