@@ -37,6 +37,6 @@ def lookup(s):
         result = jam.lookup(s)
         if result and len(result.entries) > 0:
             entry = result.entries[0]
-            return _entry_to_list(entry)
+            return _jamdict_entry_to_list(entry)
         else:
             return None
