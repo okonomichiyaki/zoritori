@@ -36,14 +36,14 @@ def main():
         path.mkdir(parents=True, exist_ok=True)
         options.NotesFolder = path
 
-    if options.engine == "google":
+    if options.Engine == "google":
         if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
             print("No Google Cloud environment variable found")
             exit(1)
         from zoritori.recognizers.google_vision import Recognizer
 
         recognizer = Recognizer()
-    elif options.engine == "tesseract":
+    elif options.Engine == "tesseract":
         from zoritori.recognizers.tesseract import Recognizer
 
         recognizer = Recognizer(options.TesseractExePath)

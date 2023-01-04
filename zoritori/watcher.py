@@ -114,7 +114,7 @@ class Watcher(threading.Thread):
                 self._options.debug = not self._options.debug
                 return True
             case glfw.KEY_T:
-                self._options.translate = not self._options.translate
+                self._options.Translate = not self._options.Translate
                 return True
             case glfw.KEY_J:
                 self._open_search("http://jisho.org/search/")
@@ -138,11 +138,11 @@ class Watcher(threading.Thread):
         """Take a fresh screenshot and process it. if relevant, trigger drawing and update watch"""
 
         self._render_state = RenderState(
-            self._options.fullscreen,
-            self._options.translate,
+            self._options.Fullscreen,
+            self._options.Translate,
             self._options.debug,
-            self._options.parts_of_speech,
-            self._options.furigana,
+            self._options.ProperNouns,
+            self._options.Furigana,
             self._options.SubtitleSize,
             self._options.SubtitleMargin,
             self._options.FuriganaSize,

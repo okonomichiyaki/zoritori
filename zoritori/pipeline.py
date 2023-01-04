@@ -40,7 +40,7 @@ def _get_text(ldata):
 
 def _recognize_tokenize_translate(options, recognizer, filename, context):
     debug = options.debug
-    should_translate = options.translate
+    should_translate = options.Translate
 
     _logger.debug("recognizing...")
     raw_data = recognizer.recognize(filename, context)
