@@ -32,6 +32,12 @@ class Overlay:
         else:
             return None
 
+    def get_mouse_pos(self):
+        if self._window:
+            return glfw.get_cursor_pos(self._window)
+        else:
+            return None
+
     def _create_window(self):
         (width, height) = self.get_screen_size()
         monitor = None  # glfw.get_primary_monitor()

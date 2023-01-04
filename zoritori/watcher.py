@@ -24,7 +24,6 @@ from zoritori.vocabulary import save_vocabulary
 from zoritori.strings import is_punctuation
 from zoritori.files import load_json, save_json
 from zoritori.types import ZoritoriData, Box, Token
-from zoritori.clips import find_hover
 from zoritori.settings import save_clips, load_clips
 import zoritori.dictionary as dictionary
 
@@ -189,7 +188,7 @@ class Watcher(threading.Thread):
     def _update_hover(self):
         """Check if the mouse cursor is hovering over a token, and if so save the token"""
         if self._saved_clip and self._last_sdata:
-            hover = find_hover(self._last_sdata.tokens)
+            hover = self._find_hover(self._last_sdata.tokens)
             if hover != self._last_hover:
                 self._last_hover = hover
                 entry = dictionary.lookup(hover.surface()) if hover else None
@@ -302,3 +301,15 @@ class Watcher(threading.Thread):
         if not self._watch_regions or not self._watch_paths:
             return False
         return screen_changed(self._watch_dir, self._watch_paths, self._watch_regions)
+
+    def _is_mouse_inside(self, box: Box):
+        rect = skia.Rect.MakeXYWH(box.clientx, box.clienty, box.width, box.height)
+        (x, y) = self._overlay.get_mouse_pos()
+        pixel = skia.Rect.MakeXYWH(x, y, 1, 1)
+        return rect.intersect(pixel)
+
+    def _find_hover(self, tokens: list[Token]):
+        for t in tokens:
+            if self._is_mouse_inside(t.box()):
+                return t
+        return None
