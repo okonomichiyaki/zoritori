@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zoritori"
-version = "0.0.1"
+version = "0.0.1-post1"
 description = "yet another tool to help you read text in Japanese video games"
 authors = ["michiaki yamada <okonomichiyaki@gmail.com>"]
 license = "MIT"
