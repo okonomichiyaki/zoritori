@@ -10,7 +10,7 @@ yet another tool to help Japanese language learners read text in video games
 * automatically collect vocabulary with context
 * (optional) English subtitles via machine translation
 
-![Taiko Risshiden V](/screenshots/taiko1.png?raw=true "Taiko Risshiden V")
+![Taiko Risshiden V](https://github.com/okonomichiyaki/zoritori/blob/main/screenshots/taiko1.png?raw=true "Taiko Risshiden V")
 
 This is a work in progress and is rough around the edges.
 
