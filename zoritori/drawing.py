@@ -182,7 +182,7 @@ def draw_parts_of_speech(c, sdata):
             paint.setColor(skia.ColorSetARGB(0xFF, 0xFF, 0x7F, 0x00))
         else:
             continue
-        c.drawRect(t.box(), paint)
+        c.drawRect(t.box().to_skia_rect(), paint)
 
 
 def draw_character_boxes(c, lines):
