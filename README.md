@@ -16,19 +16,32 @@ This is a work in progress and is rough around the edges.
 
 ## requirements:
 
-* Windows, Linux, or Mac (tested on Windows 10, Ubuntu 22.04, and macOS Montery
-* Python 3.10.x)
+* Windows, Linux, or Mac (tested on Windows 10, Ubuntu 22.04, and macOS Montery)
+* Python 3.10.x (tested with 3.10.9)
 * either Tesseract or a Google Cloud Vision API account
 * *(optional) DeepL API account for machine translated subtitles*
 * *(Linux only) scrot, python3-tk, python3-dev. X11 only for now, Wayland may not work*
 
 ## installation:
 
+on Windows, the following worked:
+
 * install Python 3.10.x
-* install `zoritori` via pip (optionally via pipx, recommended)
+* install `zoritori` via pip (optionally via pipx)
+
+on Mac and Linux, I ran into numerous issues installing via pip/pipx, so for now use the development process:
+
+* install Python 3.10.9 (recommended via pyenv)
+* install [Poetry](https://python-poetry.org/)
+* clone this repo
+* install dependencies via `poetry install`
+* when running `zoritori`, use `poetry run python -m zoritori ...` (see below for command line args)
+
+for all platforms:
+
 * download the example config file from [here](https://github.com/okonomichiyaki/zoritori/blob/main/config.ini)
 * if using Tesseract, [follow these instructions](https://github.com/tesseract-ocr/tesseract) to install it, then configure it by specifying the path to the `tesseract` binary in `config.ini`
-* if using Google Cloud Vision, [follow these steps](https://cloud.google.com/vision/docs/detect-labels-image-client-libraries) to create a project and download a credentials JSON file. then add that as an environment variable: `$env:GOOGLE_APPLICATION_CREDENTIALS="C:\path\to\json"`
+* if using Google Cloud Vision, [follow these steps](https://cloud.google.com/vision/docs/detect-labels-image-client-libraries) to create a project and download a credentials JSON file. then add that as an environment variable. Windows: `$env:GOOGLE_APPLICATION_CREDENTIALS="C:\path\to\json"`, Mac/Linux: `export GOOGLE_APPLICATION_CREDENTIALS=/path/to/json`
 
 ## usage
 
