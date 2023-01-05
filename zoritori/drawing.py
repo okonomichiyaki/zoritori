@@ -19,6 +19,7 @@ _logger = logging.getLogger("zoritori")
 
 
 def draw(c, render_state):
+    options = render_state.options
     sdata = render_state.primary_data
     clip = render_state.primary_clip.to_skia_rect()
     secondary_clip = (
@@ -26,10 +27,10 @@ def draw(c, render_state):
     )
     secondary_data = render_state.secondary_data
 
-    if render_state.parts_of_speech:
+    if options.ProperNouns:
         draw_parts_of_speech(c, sdata)
 
-    if render_state.debug:
+    if options.debug:
         draw_laser_point(c, 0, 0)
         draw_character_boxes(c, sdata.cdata)
         c.drawRect(clip, STROKE_BLUE)
@@ -39,7 +40,7 @@ def draw(c, render_state):
     if sdata.cdata:
         draw_low_confidence(c, sdata.cdata, 50)
 
-    if render_state.debug and sdata.raw_data.blocks:
+    if options.debug and sdata.raw_data.blocks:
         draw_block_boxes(c, sdata.raw_data.blocks)
 
     draw_all_furigana(c, render_state)
@@ -47,42 +48,42 @@ def draw(c, render_state):
     if sdata.translation:
         draw_subtitles(
             c,
-            render_state.subtitle_size,
-            render_state.subtitle_margin,
+            options.SubtitleSize,
+            options.SubtitleMargin,
             sdata.translation,
-            debug=render_state.debug,
+            debug=options.debug,
         )
-    elif render_state.debug and sdata.original:
+    elif options.debug and sdata.original:
         draw_subtitles(
             c,
-            render_state.subtitle_size,
-            render_state.subtitle_margin,
+            options.SubtitleSize,
+            options.SubtitleMargin,
             sdata.original,
-            debug=render_state.debug,
+            debug=options.debug,
         )
 
     if secondary_data:
         draw_subtitles(
             c,
-            render_state.subtitle_size,
-            render_state.subtitle_margin,
+            options.SubtitleSize,
+            options.SubtitleMargin,
             "\n".join(secondary_data),
             x0=secondary_clip.x() + secondary_clip.width() / 2,
             y0=secondary_clip.y() + secondary_clip.height(),
             direction=1,
-            debug=render_state.debug,
+            debug=options.debug,
         )
 
     if render_state.hover and render_state.hover_lookup:
         draw_subtitles(
             c,
-            render_state.subtitle_size,
-            render_state.subtitle_margin,
+            options.SubtitleSize,
+            options.SubtitleMargin,
             " | ".join(render_state.hover_lookup),
             x0=render_state.primary_clip.x + render_state.primary_clip.width / 2,
             y0=render_state.primary_clip.y,
             direction=-1,
-            debug=render_state.debug,
+            debug=options.debug,
         )
 
 
@@ -150,8 +151,8 @@ def draw_furigana(c, f, size):
 
 
 def draw_all_furigana(c, render_state):
-    level = render_state.furigana
-    size = render_state.furigana_size
+    level = render_state.options.Furigana
+    size = render_state.options.FuriganaSize
 
     def filter(m):
         if level == "all":

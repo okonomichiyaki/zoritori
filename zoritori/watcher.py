@@ -4,6 +4,7 @@ import threading
 import queue
 import time
 import webbrowser
+import argparse
 from pathlib import Path
 from math import trunc
 from dataclasses import dataclass
@@ -32,13 +33,7 @@ import zoritori.dictionary as dictionary
 class RenderState:
     """Snapshot of app state that gets drawn to the screen"""
 
-    translate: bool
-    debug: bool
-    parts_of_speech: bool
-    furigana: str
-    subtitle_size: int
-    subtitle_margin: int
-    furigana_size: int
+    options: argparse.Namespace
     primary_data: ZoritoriData
     primary_clip: Box
     secondary_data: list[str]
@@ -138,13 +133,7 @@ class Watcher(threading.Thread):
         """Take a fresh screenshot and process it. if relevant, trigger drawing and update watch"""
 
         self._render_state = RenderState(
-            self._options.Translate,
-            self._options.debug,
-            self._options.ProperNouns,
-            self._options.Furigana,
-            self._options.SubtitleSize,
-            self._options.SubtitleMargin,
-            self._options.FuriganaSize,
+            self._options,
             None,
             None,
             None,
