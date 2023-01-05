@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from zoritori.translator import translate
 from zoritori.tokenizer import tokenize
-from zoritori.types import Furigana, ZoritoriData, Box
+from zoritori.types import Furigana, RichData, Box
 from zoritori.vocabulary import save_vocabulary
 
 
@@ -59,7 +59,7 @@ def _recognize_tokenize_translate(options, recognizer, filename, context):
         _logger.debug("translating...")
         translation = translate(text, options.DeepLUrl, options.DeepLKey)
 
-    return ZoritoriData(text, translation, ldata, tokens, raw_data)
+    return RichData(text, translation, ldata, tokens, raw_data)
 
 
 def process_image_light(path, options, recognizer, context=None):

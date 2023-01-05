@@ -24,7 +24,7 @@ from zoritori.pipeline import process_image, process_image_light
 from zoritori.vocabulary import save_vocabulary
 from zoritori.strings import is_punctuation
 from zoritori.files import load_json, save_json
-from zoritori.types import ZoritoriData, Box, Token
+from zoritori.types import RichData, Box, Token
 from zoritori.settings import save_clips, load_clips
 import zoritori.dictionary as dictionary
 
@@ -34,7 +34,7 @@ class RenderState:
     """Snapshot of app state that gets drawn to the screen"""
 
     options: argparse.Namespace
-    primary_data: ZoritoriData
+    primary_data: RichData
     primary_clip: Box
     secondary_data: list[str]
     secondary_clip: Box

@@ -294,7 +294,7 @@ class RawData:
 
 
 @dataclass
-class ZoritoriData:
+class RichData:
     """Enriched data from tokenization, translation, etc."""
 
     original: str
