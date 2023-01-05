@@ -50,8 +50,29 @@ def get_options():
     parser.add("--ProperNouns", action="store_true", default=True)
     parser.add("--DeepLUrl", action="store", help=("DeepL API translate URL"))
     parser.add("--DeepLKey", action="store", help=("DeepL API key"))
-    parser.add("--NotesFolder", action="store", help=("Path to notes folder. If present, all notes and screenshots will be saved here."))
-    parser.add("--NotesRoot", action="store", help=("Path to notes parent folder. If present, and NotesFolder is absent, will save notes and screenshots for each session as a new folder"))
+    parser.add(
+        "--NotesFolder",
+        action="store",
+        help=(
+            "Path to notes folder. If present, all notes and screenshots will be saved here."
+        ),
+    )
+    parser.add(
+        "--NotesRoot",
+        action="store",
+        help=(
+            "Path to notes parent folder. If present, and NotesFolder is absent, will save notes and screenshots for each session as a new folder"
+        ),
+    )
     parser.add("--NotesPrefix", action="store", help=("Prefix for session folders"))
-    parser.add("--ClickThroughMode", action="store_true", help=("If true, allow mouse clicks to pass through transparent window. Windows-only"))
+    parser.add(
+        "--ClickThroughMode",
+        action="store_true",
+        help=(
+            "If true, allow mouse clicks to pass through transparent window. Windows-only"
+        ),
+    )
+    parser.add(
+        "--Fullscreen", action="store_true", help=configargparse.SUPPRESS, default=False
+    )
     return parser.parse_args()
