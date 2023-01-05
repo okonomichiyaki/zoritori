@@ -71,23 +71,23 @@ def process_image_light(path, options, recognizer, context=None):
 
 def process_image(options, recognizer, full_path, text_path, context):
     """Processes an image for vocabulary collection and saving screenshots"""
-    zoritori = _recognize_tokenize_translate(
+    rich_data = _recognize_tokenize_translate(
         options, recognizer, text_path or full_path, context
     )
-    if zoritori is None:
+    if rich_data is None:
         return None
     notes_dir = options.NotesFolder
     if notes_dir:
-        text = zoritori.original
+        text = rich_data.original
         cleaned_up = text
         for c in ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "\n"]:
             cleaned_up = cleaned_up.replace(c, "-")
             new_filename = (Path(full_path).name).replace("xxxxx", cleaned_up)
         notes_pic = Path(notes_dir) / new_filename
         os.rename(full_path, notes_pic)
-        if not save_vocabulary(notes_dir, zoritori.tokens, notes_pic):
+        if not save_vocabulary(notes_dir, rich_data.tokens, notes_pic):
             os.remove(notes_pic)
-    _logger.info(zoritori.original)
-    if zoritori.translation:
-        _logger.info(zoritori.translation)
-    return zoritori
+    _logger.info(rich_data.original)
+    if rich_data.translation:
+        _logger.info(rich_data.translation)
+    return rich_data
